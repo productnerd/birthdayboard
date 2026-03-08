@@ -4,8 +4,6 @@ import { getBoard, getWishes } from '../lib/api'
 import type { Board as BoardType, Wish } from '../lib/types'
 import AddWishForm from '../components/AddWishForm'
 import BoardView from '../components/BoardView'
-import MuteButton from '../components/MuteButton'
-import { useAudio } from '../hooks/useAudio'
 
 export default function Board() {
   const { slug } = useParams<{ slug: string }>()
@@ -13,7 +11,6 @@ export default function Board() {
   const [wishes, setWishes] = useState<Wish[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
-  const { muted, toggle } = useAudio(`${import.meta.env.BASE_URL}audio/board.mp3`)
 
   useEffect(() => {
     if (!slug) return
@@ -83,8 +80,6 @@ export default function Board() {
 
       {/* Board */}
       <BoardView wishes={wishes} board={board} />
-
-      <MuteButton muted={muted} toggle={toggle} />
     </div>
   )
 }

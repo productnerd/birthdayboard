@@ -1,67 +1,39 @@
-import { useRef, useEffect, useState, useCallback } from 'react'
 import type { Board, Wish } from '../lib/types'
 import WishCard from './WishCard'
 import PersonPhoto from './PersonPhoto'
-import { usePhysics } from '../hooks/usePhysics'
-import StringRenderer from './StringRenderer'
 
 interface Props {
   wishes: Wish[]
   board: Board
 }
 
-export default function BoardView({ wishes, board }: Props) {
-  const containerRef = useRef<HTMLDivElement>(null)
-  const { getCardTransform, startDrag, moveDrag, endDrag } = usePhysics(wishes, containerRef)
-  const [, setTick] = useState(0)
+function getPositions(wishes: Wish[]): { x: number; y: number }[] {
+  const positions: { x: number; y: number }[] = []
 
-  // Re-render at 60fps to sync DOM with physics
-  useEffect(() => {
-    let raf: number
-    function loop() {
-      setTick((t) => t + 1)
-      raf = requestAnimationFrame(loop)
+  for (let i = 0; i < wishes.length; i++) {
+    if (i === 0) {
+      // First card near center
+      positions.push({ x: 50, y: 50 })
+    } else {
+      // Random offset from a random existing card
+      const anchor = positions[Math.floor(Math.random() * positions.length)]
+      const offsetX = (Math.random() - 0.5) * 30
+      const offsetY = (Math.random() - 0.5) * 30
+      positions.push({
+        x: Math.max(10, Math.min(90, anchor.x + offsetX)),
+        y: Math.max(10, Math.min(90, anchor.y + offsetY)),
+      })
     }
-    raf = requestAnimationFrame(loop)
-    return () => cancelAnimationFrame(raf)
-  }, [])
+  }
 
-  const handlePointerDown = useCallback(
-    (wishId: string, e: React.PointerEvent) => {
-      const container = containerRef.current
-      if (!container) return
-      const rect = container.getBoundingClientRect()
-      startDrag(wishId, e.clientX - rect.left, e.clientY - rect.top)
-      ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
-    },
-    [startDrag],
-  )
+  return positions
+}
 
-  const handlePointerMove = useCallback(
-    (e: React.PointerEvent) => {
-      const container = containerRef.current
-      if (!container) return
-      const rect = container.getBoundingClientRect()
-      moveDrag(e.clientX - rect.left, e.clientY - rect.top)
-    },
-    [moveDrag],
-  )
-
-  const handlePointerUp = useCallback(() => {
-    endDrag()
-  }, [endDrag])
+export default function BoardView({ wishes, board }: Props) {
+  const positions = getPositions(wishes)
 
   return (
-    <div
-      ref={containerRef}
-      className="relative w-full overflow-hidden"
-      style={{ minHeight: '70vh' }}
-      onPointerMove={handlePointerMove}
-      onPointerUp={handlePointerUp}
-    >
-      {/* SVG layer for strings */}
-      <StringRenderer wishes={wishes} getCardTransform={getCardTransform} />
-
+    <div className="relative w-full overflow-hidden" style={{ minHeight: '70vh' }}>
       {/* Person photo in center if exists */}
       {board.person_image_path && (
         <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
@@ -69,22 +41,21 @@ export default function BoardView({ wishes, board }: Props) {
         </div>
       )}
 
-      {/* Wish cards positioned by physics */}
-      {wishes.map((wish) => {
-        const transform = getCardTransform(wish.id)
-        if (!transform) return null
+      {/* Wish cards */}
+      {wishes.map((wish, i) => {
+        const pos = positions[i]
+        const rotation = wish.rotation_deg ?? (Math.random() * 10 - 5)
 
         return (
           <div
             key={wish.id}
-            className="absolute cursor-grab active:cursor-grabbing select-none"
+            className="absolute"
             style={{
-              left: transform.x,
-              top: transform.y,
-              transform: `translate(-50%, -50%) rotate(${transform.angle}deg)`,
+              left: `${pos.x}%`,
+              top: `${pos.y}%`,
+              transform: `translate(-50%, -50%) rotate(${rotation}deg)`,
               zIndex: 5,
             }}
-            onPointerDown={(e) => handlePointerDown(wish.id, e)}
           >
             <WishCard wish={wish} />
           </div>
