@@ -39,20 +39,28 @@ function getPositions(wishes: Wish[]): { x: number; y: number }[] {
     const anchor = positions[anchorIdx]
 
     const angle = seededRandom(seed) * Math.PI * 2
-    const distance = CARD_W * 0.75 + seededRandom(seed + 1) * CARD_W * 0.3
+    const distance = CARD_W * 0.9 + seededRandom(seed + 1) * CARD_W * 0.2
     const candidate = {
       x: anchor.x + Math.cos(angle) * distance,
-      y: anchor.y + Math.sin(angle) * (CARD_H * 0.6 + seededRandom(seed + 2) * CARD_H * 0.2),
+      y: anchor.y + Math.sin(angle) * (CARD_H * 0.85 + seededRandom(seed + 2) * CARD_H * 0.1),
     }
 
+    // Push apart — keep overlap to max ~10-15% of card size
+    const minDistX = CARD_W * 0.85
+    const minDistY = CARD_H * 0.85
     for (const existing of positions) {
       const dx = candidate.x - existing.x
       const dy = candidate.y - existing.y
-      const dist = Math.sqrt(dx * dx + dy * dy)
-      if (dist < CARD_W * 0.6) {
-        const pushAngle = Math.atan2(dy, dx)
-        candidate.x += Math.cos(pushAngle) * (CARD_W * 0.6 - dist)
-        candidate.y += Math.sin(pushAngle) * (CARD_H * 0.4 - dist * 0.5)
+      const overlapX = Math.abs(dx) < minDistX
+      const overlapY = Math.abs(dy) < minDistY
+      if (overlapX && overlapY) {
+        const pushAngle = Math.atan2(dy || 1, dx || 1)
+        const push = Math.sqrt(minDistX * minDistX + minDistY * minDistY) -
+          Math.sqrt(dx * dx + dy * dy)
+        if (push > 0) {
+          candidate.x += Math.cos(pushAngle) * push * 0.6
+          candidate.y += Math.sin(pushAngle) * push * 0.6
+        }
       }
     }
 
@@ -81,6 +89,22 @@ export default function BoardView({ wishes, board }: Props) {
   }
   const layoutW = maxX - minX + CARD_W + 80
   const layoutH = maxY - minY + CARD_H + 80
+
+  // Clamp translate so layout can't be panned off-screen
+  function clampTranslate(tx: number, ty: number, s: number) {
+    const vp = viewportRef.current
+    if (!vp) return { x: tx, y: ty }
+    const vpW = vp.clientWidth
+    const vpH = vp.clientHeight
+    const scaledW = layoutW * s
+    const scaledH = layoutH * s
+    // Keep at least 25% of layout visible in each axis
+    const margin = 0.25
+    return {
+      x: Math.max(-scaledW * (1 - margin), Math.min(vpW * (1 - margin), tx)),
+      y: Math.max(-scaledH * (1 - margin), Math.min(vpH * (1 - margin), ty)),
+    }
+  }
 
   // Auto-fit zoom on mount and when wishes change
   useEffect(() => {
@@ -111,10 +135,12 @@ export default function BoardView({ wishes, board }: Props) {
     const newScale = Math.max(0.1, Math.min(3, scale * delta))
 
     // Zoom toward mouse position
-    setTranslate({
-      x: mouseX - (mouseX - translate.x) * (newScale / scale),
-      y: mouseY - (mouseY - translate.y) * (newScale / scale),
-    })
+    const newT = clampTranslate(
+      mouseX - (mouseX - translate.x) * (newScale / scale),
+      mouseY - (mouseY - translate.y) * (newScale / scale),
+      newScale,
+    )
+    setTranslate(newT)
     setScale(newScale)
   }, [scale, translate])
 
@@ -128,11 +154,12 @@ export default function BoardView({ wishes, board }: Props) {
 
   const handlePointerMove = useCallback((e: React.PointerEvent) => {
     if (!isPanning.current) return
-    setTranslate({
+    const raw = {
       x: translateStart.current.x + (e.clientX - panStart.current.x),
       y: translateStart.current.y + (e.clientY - panStart.current.y),
-    })
-  }, [])
+    }
+    setTranslate(clampTranslate(raw.x, raw.y, scale))
+  }, [scale])
 
   const handlePointerUp = useCallback(() => {
     isPanning.current = false
