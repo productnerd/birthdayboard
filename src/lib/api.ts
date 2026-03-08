@@ -28,11 +28,14 @@ export async function createBoard(data: {
   if (error) throw error
 
   if (data.person_image) {
-    const ext = data.person_image.name.split('.').pop()
+    const ext = data.person_image.name.split('.').pop() || 'jpg'
     const path = `boards/${board.id}/person.${ext}`
     const { error: uploadError } = await supabase.storage
       .from('birthdayboard')
-      .upload(path, data.person_image)
+      .upload(path, data.person_image, {
+        contentType: data.person_image.type || 'image/jpeg',
+        upsert: true,
+      })
     if (uploadError) throw uploadError
 
     await supabase
@@ -89,11 +92,14 @@ export async function createWish(data: {
   if (error) throw error
 
   if (data.photo) {
-    const ext = data.photo.name.split('.').pop()
+    const ext = data.photo.name.split('.').pop() || 'jpg'
     const path = `wishes/${wish.id}/photo.${ext}`
     const { error: uploadError } = await supabase.storage
       .from('birthdayboard')
-      .upload(path, data.photo)
+      .upload(path, data.photo, {
+        contentType: data.photo.type || 'image/jpeg',
+        upsert: true,
+      })
     if (uploadError) throw uploadError
 
     await supabase

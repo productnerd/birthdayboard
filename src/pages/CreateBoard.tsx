@@ -33,8 +33,11 @@ export default function CreateBoard() {
         person_image: personImage,
       })
       navigate(`/created/${board.slug}`)
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong')
+    } catch (err: unknown) {
+      const msg = err instanceof Error ? err.message
+        : typeof err === 'object' && err !== null && 'message' in err ? String((err as { message: unknown }).message)
+        : String(err)
+      setError(msg || 'Something went wrong')
     } finally {
       setLoading(false)
     }

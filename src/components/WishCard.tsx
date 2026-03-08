@@ -40,7 +40,7 @@ export default function WishCard({ wish }: Props) {
       />
 
       {/* Card */}
-      <div className="paper-card rounded-xl p-5 pt-6 mt-1">
+      <div className="paper-card rounded-xl p-5 pt-6 mt-1 overflow-hidden" style={{ wordBreak: 'break-word' }}>
         {wish.photo_path && (
           <div
             className="polaroid mb-4 rounded-sm"
