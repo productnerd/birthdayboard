@@ -24,7 +24,7 @@ export default function WishCard({ wish }: Props) {
       />
 
       {/* Card */}
-      <div className="paper-card rounded p-6 pt-7 mt-1">
+      <div className="paper-card rounded p-8 pt-9 mt-1">
         {wish.photo_path && (
           <div className="polaroid mb-3">
             <img
