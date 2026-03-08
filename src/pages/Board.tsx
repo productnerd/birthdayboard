@@ -11,9 +11,11 @@ export default function Board() {
   const [wishes, setWishes] = useState<Wish[]>([])
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
+  const [hasPosted, setHasPosted] = useState(false)
 
   useEffect(() => {
     if (!slug) return
+    setHasPosted(localStorage.getItem(`bb-posted-${slug}`) === '1')
     loadBoard()
   }, [slug])
 
@@ -29,6 +31,8 @@ export default function Board() {
   function handleWishAdded(wish: Wish) {
     setWishes(prev => [...prev, wish])
     setShowForm(false)
+    setHasPosted(true)
+    localStorage.setItem(`bb-posted-${slug}`, '1')
   }
 
   if (loading) {
@@ -63,12 +67,18 @@ export default function Board() {
           — organized by {board.creator_name}
         </p>
 
-        <button
-          onClick={() => setShowForm(!showForm)}
-          className="mt-4 bg-amber-700 hover:bg-amber-800 text-white font-handwriting text-xl px-6 py-2 rounded-lg transition-colors"
-        >
-          {showForm ? 'Close' : 'Add a Wish'}
-        </button>
+        {hasPosted ? (
+          <p className="mt-4 font-hand text-lg text-amber-700 italic">
+            You've already left your wish!
+          </p>
+        ) : (
+          <button
+            onClick={() => setShowForm(!showForm)}
+            className="mt-4 bg-amber-700 hover:bg-amber-800 text-white font-handwriting text-xl px-6 py-2 rounded-lg transition-colors"
+          >
+            {showForm ? 'Close' : 'Add a Wish'}
+          </button>
+        )}
       </div>
 
       {/* Add wish form */}
