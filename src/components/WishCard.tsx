@@ -3,9 +3,9 @@ import { getPublicUrl } from '../lib/storage'
 
 interface Props {
   wish: Wish
+  stringLength: number
+  pinColor: string
 }
-
-const PIN_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6']
 
 function seededRandom(seed: number): number {
   const x = Math.sin(seed) * 10000
@@ -20,27 +20,52 @@ function hashCode(s: string): number {
   return Math.abs(h)
 }
 
-export default function WishCard({ wish }: Props) {
-  const pinColor = PIN_COLORS[wish.message.length % PIN_COLORS.length]
+export default function WishCard({ wish, stringLength, pinColor }: Props) {
   const seed = hashCode(wish.id)
   const polaroidRotation = seededRandom(seed + 10) * 6 - 3
   const textRotation = seededRandom(seed + 20) * 2 - 1
+  // Slight horizontal sway based on string length
+  const sway = (seededRandom(seed + 30) - 0.5) * 8
 
   return (
     <div
-      className="relative flex-shrink-0"
+      className="relative flex-shrink-0 flex flex-col items-center"
       style={{ width: wish.photo_path ? '280px' : '260px' }}
     >
-      {/* Pin */}
+      {/* Pin at top */}
       <div
-        className="absolute -top-2 left-1/2 -translate-x-1/2 w-5 h-5 rounded-full z-10 shadow-md"
+        className="w-4 h-4 rounded-full shadow-md z-10 relative"
         style={{
-          background: `radial-gradient(circle at 35% 35%, ${pinColor}, ${pinColor}dd)`,
+          background: `radial-gradient(circle at 35% 35%, ${pinColor}, ${pinColor}cc)`,
         }}
       />
 
+      {/* String */}
+      <div
+        className="relative flex justify-center"
+        style={{ height: stringLength }}
+      >
+        <svg
+          width="20"
+          height={stringLength}
+          className="absolute top-0"
+          style={{ overflow: 'visible' }}
+        >
+          <path
+            d={`M 10 0 Q ${10 + sway * 0.5} ${stringLength * 0.5}, ${10 + sway * 0.3} ${stringLength}`}
+            stroke="#8B7355"
+            strokeWidth="1.5"
+            fill="none"
+            opacity="0.7"
+          />
+        </svg>
+      </div>
+
       {/* Card */}
-      <div className="paper-card rounded-xl p-5 pt-6 mt-1 overflow-hidden" style={{ wordBreak: 'break-word' }}>
+      <div
+        className="paper-card rounded-xl p-5 pt-5 overflow-hidden"
+        style={{ wordBreak: 'break-word', transform: `rotate(${sway * 0.4}deg)` }}
+      >
         {wish.photo_path && (
           <div
             className="polaroid mb-4 rounded-sm"

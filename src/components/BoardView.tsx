@@ -21,6 +21,8 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x)
 }
 
+const PIN_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#e67e22']
+
 export default function BoardView({ wishes, board }: Props) {
   const viewportRef = useRef<HTMLDivElement>(null)
   const contentRef = useRef<HTMLDivElement>(null)
@@ -30,13 +32,11 @@ export default function BoardView({ wishes, board }: Props) {
   const panStart = useRef({ x: 0, y: 0 })
   const translateStart = useRef({ x: 0, y: 0 })
 
-  // Auto-fit zoom when content overflows viewport
   useEffect(() => {
     const vp = viewportRef.current
     const content = contentRef.current
     if (!vp || !content || wishes.length === 0) return
 
-    // Wait a tick for layout to settle
     requestAnimationFrame(() => {
       const vpW = vp.clientWidth
       const vpH = vp.clientHeight
@@ -71,14 +71,11 @@ export default function BoardView({ wishes, board }: Props) {
     e.preventDefault()
     const vp = viewportRef.current
     if (!vp) return
-
     const rect = vp.getBoundingClientRect()
     const mouseX = e.clientX - rect.left
     const mouseY = e.clientY - rect.top
-
     const delta = e.deltaY > 0 ? 0.9 : 1.1
     const newScale = Math.max(0.1, Math.min(3, scale * delta))
-
     const newT = clampTranslate(
       mouseX - (mouseX - translate.x) * (newScale / scale),
       mouseY - (mouseY - translate.y) * (newScale / scale),
@@ -134,18 +131,20 @@ export default function BoardView({ wishes, board }: Props) {
           </div>
         )}
 
-        {/* Cards in a flex wrap — no overlap possible */}
-        <div className="flex flex-wrap justify-center items-start gap-8 p-6 max-w-5xl">
+        {/* Cards hanging from strings */}
+        <div className="flex flex-wrap justify-center items-start gap-6 p-6 max-w-6xl">
           {wishes.map((wish) => {
             const seed = hashCode(wish.id)
-            const rotation = wish.rotation_deg ?? (seededRandom(seed + 3) * 8 - 4)
+            const stringLength = 30 + seededRandom(seed + 5) * 70
+            const pinColor = PIN_COLORS[seed % PIN_COLORS.length]
 
             return (
-              <div
-                key={wish.id}
-                style={{ transform: `rotate(${rotation}deg)` }}
-              >
-                <WishCard wish={wish} />
+              <div key={wish.id}>
+                <WishCard
+                  wish={wish}
+                  stringLength={stringLength}
+                  pinColor={pinColor}
+                />
               </div>
             )
           })}
