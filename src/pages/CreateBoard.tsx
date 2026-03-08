@@ -18,9 +18,13 @@ export default function CreateBoard() {
       : undefined
 
     try {
+      const month = String(form.get('birthday_month')).padStart(2, '0')
+      const day = String(form.get('birthday_day')).padStart(2, '0')
+      const birthdayDate = `${new Date().getFullYear()}-${month}-${day}`
+
       const board = await createBoard({
         person_name: form.get('person_name') as string,
-        birthday_date: form.get('birthday_date') as string,
+        birthday_date: birthdayDate,
         creator_name: form.get('creator_name') as string,
         prompt_note: form.get('prompt_note') as string,
         person_image: personImage,
@@ -54,15 +58,31 @@ export default function CreateBoard() {
           />
         </label>
 
-        <label className="block mb-4">
+        <div className="block mb-4">
           <span className="text-amber-800 text-lg">Birthday date</span>
-          <input
-            name="birthday_date"
-            type="date"
-            required
-            className="mt-1 block w-full rounded border border-amber-300 bg-amber-50 px-3 py-2 font-hand text-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
-          />
-        </label>
+          <div className="flex gap-3 mt-1">
+            <select
+              name="birthday_month"
+              required
+              className="flex-1 rounded border border-amber-300 bg-amber-50 px-3 py-2 font-hand text-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+            >
+              <option value="">Month</option>
+              {['January','February','March','April','May','June','July','August','September','October','November','December'].map((m, i) => (
+                <option key={m} value={i + 1}>{m}</option>
+              ))}
+            </select>
+            <select
+              name="birthday_day"
+              required
+              className="w-20 rounded border border-amber-300 bg-amber-50 px-3 py-2 font-hand text-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+            >
+              <option value="">Day</option>
+              {Array.from({ length: 31 }, (_, i) => (
+                <option key={i + 1} value={i + 1}>{i + 1}</option>
+              ))}
+            </select>
+          </div>
+        </div>
 
         <label className="block mb-4">
           <span className="text-amber-800 text-lg">Your name (the organizer)</span>
