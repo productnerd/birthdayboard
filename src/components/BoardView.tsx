@@ -232,21 +232,6 @@ export default function BoardView({ wishes, board }: Props) {
         </p>
       )}
 
-      {/* Zoom controls */}
-      <div className="fixed bottom-4 left-4 z-50 flex gap-2">
-        <button
-          onClick={() => setScale(s => Math.min(3, s * 1.2))}
-          className="w-10 h-10 rounded-full bg-amber-800/80 text-white text-xl flex items-center justify-center hover:bg-amber-900"
-        >
-          +
-        </button>
-        <button
-          onClick={() => setScale(s => Math.max(0.1, s * 0.8))}
-          className="w-10 h-10 rounded-full bg-amber-800/80 text-white text-xl flex items-center justify-center hover:bg-amber-900"
-        >
-          -
-        </button>
-      </div>
     </div>
   )
 }
