@@ -1,0 +1,63 @@
+@import "tailwindcss";
+
+:root {
+  --cork: #c4956a;
+  --cork-dark: #a87d55;
+  --paper: #faf3e0;
+  --paper-shadow: rgba(0, 0, 0, 0.15);
+  --pin-red: #e74c3c;
+  --pin-blue: #3498db;
+  --pin-green: #2ecc71;
+  --pin-yellow: #f1c40f;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Patrick Hand', cursive;
+  background: var(--cork);
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+.font-handwriting {
+  font-family: 'Caveat', cursive;
+}
+
+.font-hand {
+  font-family: 'Patrick Hand', cursive;
+}
+
+.cork-bg {
+  background-color: var(--cork);
+  background-image:
+    repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    ),
+    repeating-linear-gradient(
+      90deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+}
+
+.paper-card {
+  background: var(--paper);
+  box-shadow: 2px 3px 8px var(--paper-shadow);
+}
+
+.polaroid {
+  background: white;
+  padding: 8px 8px 32px 8px;
+  box-shadow: 2px 3px 12px rgba(0,0,0,0.2);
+}
