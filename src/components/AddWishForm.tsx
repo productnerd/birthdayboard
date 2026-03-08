@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useRef, type FormEvent } from 'react'
 import { createWish } from '../lib/api'
 import type { Wish } from '../lib/types'
 
@@ -10,6 +10,8 @@ interface Props {
 export default function AddWishForm({ boardId, onWishAdded }: Props) {
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [photoName, setPhotoName] = useState('')
+  const photoRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -67,15 +69,27 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
         />
       </label>
 
-      <label className="block mb-4">
+      <div className="block mb-4">
         <span className="text-amber-800 font-hand">Add a photo (optional)</span>
         <input
+          ref={photoRef}
           name="photo"
           type="file"
           accept="image/*"
-          className="mt-1 block w-full text-amber-800 font-hand"
+          className="hidden"
+          onChange={(e) => setPhotoName(e.target.files?.[0]?.name || '')}
         />
-      </label>
+        <div className="flex items-center gap-3 mt-1">
+          <button
+            type="button"
+            onClick={() => photoRef.current?.click()}
+            className="px-4 py-2 rounded border border-amber-300 bg-amber-50 text-amber-800 font-hand hover:bg-amber-100 transition-colors"
+          >
+            Choose Photo
+          </button>
+          {photoName && <span className="text-amber-700 font-hand text-sm truncate">{photoName}</span>}
+        </div>
+      </div>
 
       {error && (
         <p className="text-red-600 mb-3 font-hand">{error}</p>

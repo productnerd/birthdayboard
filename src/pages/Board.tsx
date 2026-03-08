@@ -4,6 +4,7 @@ import { getBoard, getWishes } from '../lib/api'
 import type { Board as BoardType, Wish } from '../lib/types'
 import AddWishForm from '../components/AddWishForm'
 import BoardView from '../components/BoardView'
+import ShareModal from '../components/ShareModal'
 
 export default function Board() {
   const { slug } = useParams<{ slug: string }>()
@@ -12,6 +13,9 @@ export default function Board() {
   const [loading, setLoading] = useState(true)
   const [showForm, setShowForm] = useState(false)
   const [hasPosted, setHasPosted] = useState(false)
+  const [showShareModal, setShowShareModal] = useState(false)
+
+  const shareUrl = `${window.location.origin}${import.meta.env.BASE_URL}#/board/${slug}`
 
   useEffect(() => {
     if (!slug) return
@@ -33,6 +37,11 @@ export default function Board() {
     setShowForm(false)
     setHasPosted(true)
     localStorage.setItem(`bb-posted-${slug}`, '1')
+    setShowShareModal(true)
+  }
+
+  function copyShareUrl() {
+    navigator.clipboard.writeText(shareUrl)
   }
 
   if (loading) {
@@ -53,6 +62,14 @@ export default function Board() {
 
   return (
     <div className="min-h-screen cork-bg">
+      {/* Share button — top right */}
+      <button
+        onClick={() => { copyShareUrl(); setShowShareModal(true) }}
+        className="fixed top-4 right-4 z-50 bg-amber-700/90 hover:bg-amber-800 text-white font-hand px-4 py-2 rounded-lg transition-colors text-sm"
+      >
+        Share Board
+      </button>
+
       {/* Header */}
       <div className="text-center py-6 px-4">
         <h1 className="font-handwriting text-5xl text-amber-950 drop-shadow-sm">
@@ -90,6 +107,15 @@ export default function Board() {
 
       {/* Board */}
       <BoardView wishes={wishes} board={board} />
+
+      {/* Share modal */}
+      {showShareModal && (
+        <ShareModal
+          shareUrl={shareUrl}
+          personName={board.person_name}
+          onClose={() => setShowShareModal(false)}
+        />
+      )}
     </div>
   )
 }

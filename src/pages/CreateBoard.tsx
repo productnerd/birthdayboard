@@ -1,4 +1,4 @@
-import { useState, type FormEvent } from 'react'
+import { useState, useRef, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createBoard } from '../lib/api'
 
@@ -6,6 +6,8 @@ export default function CreateBoard() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fileName, setFileName] = useState('')
+  const fileRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -106,15 +108,27 @@ export default function CreateBoard() {
           />
         </label>
 
-        <label className="block mb-4">
+        <div className="block mb-4">
           <span className="text-amber-800 text-lg">Photo of them (optional)</span>
           <input
+            ref={fileRef}
             name="person_image"
             type="file"
             accept="image/*"
-            className="mt-1 block w-full text-amber-800 font-hand"
+            className="hidden"
+            onChange={(e) => setFileName(e.target.files?.[0]?.name || '')}
           />
-        </label>
+          <div className="flex items-center gap-3 mt-1">
+            <button
+              type="button"
+              onClick={() => fileRef.current?.click()}
+              className="px-4 py-2 rounded border border-amber-300 bg-amber-50 text-amber-800 font-hand text-lg hover:bg-amber-100 transition-colors"
+            >
+              Choose Photo
+            </button>
+            {fileName && <span className="text-amber-700 font-hand text-sm truncate">{fileName}</span>}
+          </div>
+        </div>
 
         <label className="block mb-6">
           <span className="text-amber-800 text-lg">Prompt for friends (optional)</span>
