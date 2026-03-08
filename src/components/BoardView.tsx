@@ -176,6 +176,11 @@ export default function BoardView({ wishes, board }: Props) {
           const pos = positions[i]
           const seed = hashCode(wish.id)
           const rotation = wish.rotation_deg ?? (seededRandom(seed + 3) * 12 - 6)
+          // Cards higher on the page (lower y) get higher z-index
+          // so their bottom text sits on top of cards below
+          const y = pos.y - minY
+          const maxY2 = maxY - minY || 1
+          const zIndex = Math.round((1 - y / maxY2) * 1000)
 
           return (
             <div
@@ -185,7 +190,7 @@ export default function BoardView({ wishes, board }: Props) {
                 left: pos.x - minX + 40,
                 top: pos.y - minY + 40,
                 transform: `rotate(${rotation}deg)`,
-                zIndex: i,
+                zIndex,
               }}
             >
               <WishCard wish={wish} />
