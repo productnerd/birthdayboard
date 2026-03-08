@@ -39,27 +39,31 @@ function getPositions(wishes: Wish[]): { x: number; y: number }[] {
     const anchor = positions[anchorIdx]
 
     const angle = seededRandom(seed) * Math.PI * 2
-    const distance = CARD_W * 0.9 + seededRandom(seed + 1) * CARD_W * 0.2
+    const gap = 20
+    const distance = CARD_W + gap + seededRandom(seed + 1) * CARD_W * 0.3
     const candidate = {
       x: anchor.x + Math.cos(angle) * distance,
-      y: anchor.y + Math.sin(angle) * (CARD_H * 0.85 + seededRandom(seed + 2) * CARD_H * 0.1),
+      y: anchor.y + Math.sin(angle) * (CARD_H + gap + seededRandom(seed + 2) * CARD_H * 0.2),
     }
 
-    // Push apart — keep overlap to max ~10-15% of card size
-    const minDistX = CARD_W * 0.85
-    const minDistY = CARD_H * 0.85
-    for (const existing of positions) {
-      const dx = candidate.x - existing.x
-      const dy = candidate.y - existing.y
-      const overlapX = Math.abs(dx) < minDistX
-      const overlapY = Math.abs(dy) < minDistY
-      if (overlapX && overlapY) {
-        const pushAngle = Math.atan2(dy || 1, dx || 1)
-        const push = Math.sqrt(minDistX * minDistX + minDistY * minDistY) -
-          Math.sqrt(dx * dx + dy * dy)
-        if (push > 0) {
-          candidate.x += Math.cos(pushAngle) * push * 0.6
-          candidate.y += Math.sin(pushAngle) * push * 0.6
+    // Push apart — no overlap allowed, maintain gap
+    const minDistX = CARD_W + gap
+    const minDistY = CARD_H + gap
+    for (let pass = 0; pass < 3; pass++) {
+      for (const existing of positions) {
+        const dx = candidate.x - existing.x
+        const dy = candidate.y - existing.y
+        const overlapX = Math.abs(dx) < minDistX
+        const overlapY = Math.abs(dy) < minDistY
+        if (overlapX && overlapY) {
+          const pushAngle = Math.atan2(dy || 1, dx || 1)
+          const currentDist = Math.sqrt(dx * dx + dy * dy)
+          const requiredDist = Math.sqrt(minDistX * minDistX + minDistY * minDistY)
+          const push = requiredDist - currentDist
+          if (push > 0) {
+            candidate.x += Math.cos(pushAngle) * push * 0.6
+            candidate.y += Math.sin(pushAngle) * push * 0.6
+          }
         }
       }
     }
