@@ -13,7 +13,7 @@ export default function WishCard({ wish }: Props) {
   return (
     <div
       className="relative flex-shrink-0"
-      style={{ width: wish.photo_path ? '240px' : '200px' }}
+      style={{ width: wish.photo_path ? '280px' : '260px' }}
     >
       {/* Pin */}
       <div
