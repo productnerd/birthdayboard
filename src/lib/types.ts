@@ -6,6 +6,7 @@ export interface Board {
   birthday_date: string
   prompt_note: string | null
   creator_name: string
+  creator_email: string | null
   created_at: string
 }
 

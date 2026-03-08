@@ -6,6 +6,7 @@ export async function createBoard(data: {
   person_name: string
   birthday_date: string
   creator_name: string
+  creator_email: string
   prompt_note?: string
   person_image?: File
 }): Promise<Board> {
@@ -18,6 +19,7 @@ export async function createBoard(data: {
       person_name: data.person_name,
       birthday_date: data.birthday_date,
       creator_name: data.creator_name,
+      creator_email: data.creator_email,
       prompt_note: data.prompt_note || null,
     })
     .select()
@@ -40,6 +42,16 @@ export async function createBoard(data: {
 
     board.person_image_path = path
   }
+
+  // Send creation email (fire-and-forget)
+  supabase.functions.invoke('notify-board-created', {
+    body: {
+      creator_email: data.creator_email,
+      creator_name: data.creator_name,
+      person_name: data.person_name,
+      slug,
+    },
+  }).catch(() => {})
 
   return board
 }
@@ -91,6 +103,11 @@ export async function createWish(data: {
 
     wish.photo_path = path
   }
+
+  // Check milestone notifications (fire-and-forget)
+  supabase.functions.invoke('check-wish-milestone', {
+    body: { board_id: data.board_id },
+  }).catch(() => {})
 
   return wish
 }

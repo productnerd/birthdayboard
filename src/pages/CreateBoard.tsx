@@ -26,6 +26,7 @@ export default function CreateBoard() {
         person_name: form.get('person_name') as string,
         birthday_date: birthdayDate,
         creator_name: form.get('creator_name') as string,
+        creator_email: form.get('creator_email') as string,
         prompt_note: form.get('prompt_note') as string,
         person_image: personImage,
       })
@@ -91,6 +92,17 @@ export default function CreateBoard() {
             required
             className="mt-1 block w-full rounded border border-amber-300 bg-amber-50 px-3 py-2 font-hand text-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
             placeholder="e.g. Alex"
+          />
+        </label>
+
+        <label className="block mb-4">
+          <span className="text-amber-800 text-lg">Your email (for notifications)</span>
+          <input
+            name="creator_email"
+            type="email"
+            required
+            className="mt-1 block w-full rounded border border-amber-300 bg-amber-50 px-3 py-2 font-hand text-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+            placeholder="you@example.com"
           />
         </label>
 
