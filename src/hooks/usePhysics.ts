@@ -98,7 +98,7 @@ export function usePhysics(wishes: Wish[]) {
   // Init engine
   useEffect(() => {
     const engine = Matter.Engine.create({
-      gravity: { x: 0, y: 1, scale: 0.002 },
+      gravity: { x: 0, y: 1, scale: 0.006 },
     })
     engineRef.current = engine
 
@@ -193,9 +193,9 @@ export function usePhysics(wishes: Wish[]) {
       Matter.Composite.add(engine.world, [pin, card, constraint])
       existing.set(wish.id, { pin, card, constraint, pinOffsetX })
 
-      // Small nudge to start swinging
+      // Stronger initial nudge
       Matter.Body.applyForce(card, card.position, {
-        x: (seededRandom(seed + 70) - 0.5) * 0.008,
+        x: (seededRandom(seed + 70) - 0.5) * 0.02,
         y: 0,
       })
     })
@@ -214,7 +214,7 @@ export function usePhysics(wishes: Wish[]) {
     const interval = setInterval(() => {
       cardsRef.current.forEach((bodies) => {
         Matter.Body.applyForce(bodies.card, bodies.card.position, {
-          x: (Math.random() - 0.5) * 0.0008,
+          x: (Math.random() - 0.5) * 0.003,
           y: 0,
         })
       })
