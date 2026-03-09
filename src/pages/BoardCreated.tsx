@@ -40,9 +40,9 @@ export default function BoardCreated() {
 
         <a
           href={`#/board/${slug}`}
-          className="text-amber-700 hover:text-amber-900 font-hand text-lg underline"
+          className="block w-full border-2 border-amber-700 text-amber-700 hover:bg-amber-50 font-handwriting text-xl py-2 rounded-lg transition-colors text-center"
         >
-          View the board
+          Write First Wish
         </a>
       </div>
     </div>
