@@ -174,10 +174,13 @@ export function usePhysics(wishes: Wish[]) {
         },
       )
 
+      // Off-center pin attachment creates natural gravity tilt
+      const pinOffsetX = (seededRandom(seed + 80) - 0.5) * CARD_W * 0.5
+
       const constraint = Matter.Constraint.create({
         bodyA: pin,
         bodyB: card,
-        pointB: { x: 0, y: -CARD_H * 0.5 },
+        pointB: { x: pinOffsetX, y: -CARD_H * 0.5 },
         stiffness: 0.4,
         damping: 0.1,
         length: 20,

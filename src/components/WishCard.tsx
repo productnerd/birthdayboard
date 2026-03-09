@@ -47,7 +47,7 @@ export default function WishCard({ wish }: Props) {
         )}
 
         <div style={{ transform: `rotate(${textRotation}deg)` }}>
-          <p className="font-handwriting text-xl text-amber-950 leading-snug mb-2">
+          <p className="text-xl text-amber-950 leading-snug mb-2" style={{ fontFamily: `'${wish.font_family || 'Caveat'}', cursive` }}>
             {wish.message}
           </p>
           <p className="font-hand text-sm text-amber-700 text-right">

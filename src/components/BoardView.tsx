@@ -9,16 +9,6 @@ interface Props {
   board: Board
 }
 
-const PIN_COLORS = ['#e74c3c', '#3498db', '#2ecc71', '#f1c40f', '#9b59b6', '#e67e22']
-
-function hashCode(s: string): number {
-  let h = 0
-  for (let i = 0; i < s.length; i++) {
-    h = (Math.imul(31, h) + s.charCodeAt(i)) | 0
-  }
-  return Math.abs(h)
-}
-
 export default function BoardView({ wishes, board }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { cardStates, pinPositions, startDrag, moveDrag, endDrag } = usePhysics(wishes)
@@ -47,11 +37,14 @@ export default function BoardView({ wishes, board }: Props) {
     endDrag()
   }, [endDrag])
 
-  // Calculate bounds for scrollable area
+  // Calculate bounds from actual card positions (physics bodies) + card dimensions
   let maxX = 1200, maxY = 800
+  cardStates.forEach((state) => {
+    maxX = Math.max(maxX, state.x + 300)
+    maxY = Math.max(maxY, state.y + 250)
+  })
   pinPositions.forEach((pos) => {
-    maxX = Math.max(maxX, pos.x + 400)
-    maxY = Math.max(maxY, pos.y + 600)
+    maxX = Math.max(maxX, pos.x + 300)
   })
 
   return (
@@ -78,16 +71,15 @@ export default function BoardView({ wishes, board }: Props) {
         {wishes.map((wish) => {
           const pinPos = pinPositions.get(wish.id)
           if (!pinPos) return null
-          const pinColor = PIN_COLORS[hashCode(wish.id) % PIN_COLORS.length]
 
           return (
             <div
               key={`pin-${wish.id}`}
-              className="absolute w-5 h-5 rounded-full shadow-md z-30"
+              className="absolute w-4 h-4 rounded-full shadow-md z-30"
               style={{
-                left: pinPos.x - 10,
-                top: pinPos.y - 10,
-                background: `radial-gradient(circle at 35% 35%, ${pinColor}, ${pinColor}cc)`,
+                left: pinPos.x - 8,
+                top: pinPos.y - 8,
+                background: 'radial-gradient(circle at 35% 35%, #444, #111)',
               }}
             />
           )

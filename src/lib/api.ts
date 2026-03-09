@@ -74,6 +74,7 @@ export async function createWish(data: {
   board_id: string
   author_name: string
   message: string
+  font_family?: string
   photo?: File
 }): Promise<Wish> {
   const { data: wish, error } = await supabase
@@ -82,6 +83,7 @@ export async function createWish(data: {
       board_id: data.board_id,
       author_name: data.author_name,
       message: data.message,
+      font_family: data.font_family || 'Caveat',
       rotation_deg: Math.random() * 10 - 5,
       position_x: 0.2 + Math.random() * 0.6,
       position_y: 0.2 + Math.random() * 0.6,
