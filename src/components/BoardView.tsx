@@ -37,14 +37,15 @@ export default function BoardView({ wishes, board }: Props) {
     endDrag()
   }, [endDrag])
 
-  // Calculate bounds from actual card positions (physics bodies) + card dimensions
+  // Calculate bounds from actual card positions — generous margins to prevent cropping
   let maxX = 1200, maxY = 800
   cardStates.forEach((state) => {
-    maxX = Math.max(maxX, state.x + 300)
-    maxY = Math.max(maxY, state.y + 250)
+    maxX = Math.max(maxX, state.x + 400)
+    maxY = Math.max(maxY, state.y + 400)
   })
   pinPositions.forEach((pos) => {
-    maxX = Math.max(maxX, pos.x + 300)
+    maxX = Math.max(maxX, pos.x + 400)
+    maxY = Math.max(maxY, pos.y + 500)
   })
 
   return (

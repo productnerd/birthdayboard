@@ -26,7 +26,7 @@ export default function WishCard({ wish }: Props) {
   return (
     <div
       className="relative"
-      style={{ width: wish.photo_path ? '280px' : '260px' }}
+      style={{ width: wish.photo_path ? '300px' : '280px' }}
     >
       {/* Card */}
       <div

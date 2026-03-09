@@ -2,8 +2,8 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import Matter from 'matter-js'
 import type { Wish } from '../lib/types'
 
-const CARD_W = 280
-const CARD_H = 350
+const CARD_W = 300
+const CARD_H = 320
 
 interface CardState {
   x: number
@@ -34,7 +34,7 @@ function getPinPositions(wishes: Wish[]): Map<string, { x: number; y: number }> 
     const seed = hashCode(wishes[i].id)
 
     if (i === 0) {
-      const pos = { x: 600, y: 80 }
+      const pos = { x: 500, y: 60 }
       positions.set(wishes[i].id, pos)
       placed.push(pos)
       continue
@@ -74,8 +74,9 @@ function getPinPositions(wishes: Wish[]): Map<string, { x: number; y: number }> 
       bestCandidate = candidate
     }
 
-    // Ensure pin y stays in a reasonable range (pins should be near top area)
-    bestCandidate.y = Math.max(40, Math.min(200, bestCandidate.y))
+    // Ensure pins stay in reasonable range — enough margin so cards aren't cropped
+    bestCandidate.x = Math.max(CARD_W * 0.6, bestCandidate.x)
+    bestCandidate.y = Math.max(40, Math.min(180, bestCandidate.y))
 
     positions.set(wishes[i].id, bestCandidate)
     placed.push(bestCandidate)
@@ -96,7 +97,7 @@ export function usePhysics(wishes: Wish[]) {
   // Init engine
   useEffect(() => {
     const engine = Matter.Engine.create({
-      gravity: { x: 0, y: 1, scale: 0.001 },
+      gravity: { x: 0, y: 1, scale: 0.002 },
     })
     engineRef.current = engine
 
@@ -153,45 +154,46 @@ export function usePhysics(wishes: Wish[]) {
       if (!pinPos) return
 
       const seed = hashCode(wish.id)
-      const initialAngle = (seededRandom(seed + 50) - 0.5) * 0.15
 
-      const pin = Matter.Bodies.circle(pinPos.x, pinPos.y, 8, {
+      const pin = Matter.Bodies.circle(pinPos.x, pinPos.y, 6, {
         isStatic: true,
         collisionFilter: { mask: 0 },
       })
 
+      // Off-center pin: offset X by up to ±30% of card width
+      const pinOffsetX = (seededRandom(seed + 80) - 0.5) * CARD_W * 0.6
+
+      // Place card so the pin attachment point starts at the pin position
       const card = Matter.Bodies.rectangle(
-        pinPos.x + (seededRandom(seed + 60) - 0.5) * 20,
-        pinPos.y + CARD_H * 0.5 + 20,
+        pinPos.x - pinOffsetX,
+        pinPos.y + CARD_H * 0.4,
         CARD_W,
         CARD_H,
         {
-          mass: 1,
-          frictionAir: 0.04,
-          angle: initialAngle,
-          restitution: 0.2,
+          mass: 2,
+          frictionAir: 0.03,
+          angle: 0,
+          restitution: 0.1,
           collisionFilter: { group: -1 },
         },
       )
 
-      // Off-center pin attachment creates natural gravity tilt
-      const pinOffsetX = (seededRandom(seed + 80) - 0.5) * CARD_W * 0.5
-
+      // Pin attaches at top 10% of card, off-center
       const constraint = Matter.Constraint.create({
         bodyA: pin,
         bodyB: card,
-        pointB: { x: pinOffsetX, y: -CARD_H * 0.5 },
-        stiffness: 0.4,
-        damping: 0.1,
-        length: 20,
+        pointB: { x: pinOffsetX, y: -CARD_H * 0.4 },
+        stiffness: 0.9,
+        damping: 0.05,
+        length: 0,
       })
 
       Matter.Composite.add(engine.world, [pin, card, constraint])
       existing.set(wish.id, { pin, card, constraint })
 
-      // Give initial nudge for organic feel
+      // Small nudge to start swinging
       Matter.Body.applyForce(card, card.position, {
-        x: (seededRandom(seed + 70) - 0.5) * 0.005,
+        x: (seededRandom(seed + 70) - 0.5) * 0.008,
         y: 0,
       })
     })
