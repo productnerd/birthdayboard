@@ -104,11 +104,6 @@ export default function BoardView({ wishes, board }: Props) {
           )
         })}
 
-        {wishes.length === 0 && (
-          <p className="text-center font-handwriting text-2xl text-amber-800 pt-24 opacity-70 absolute w-full">
-            No wishes yet — be the first!
-          </p>
-        )}
       </div>
     </div>
   )
