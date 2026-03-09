@@ -23,10 +23,15 @@ export default function WishCard({ wish }: Props) {
   const polaroidRotation = seededRandom(seed + 10) * 6 - 3
   const textRotation = seededRandom(seed + 20) * 2 - 1
 
+  // Random card width between 260-340px, seeded per wish
+  const cardWidth = 260 + seededRandom(seed + 30) * 80
+  const font = wish.font_family || 'Indie Flower'
+  const fontSize = font === 'Reenie Beanie' ? '1.5rem' : '1.25rem'
+
   return (
     <div
       className="relative"
-      style={{ width: wish.photo_path ? '300px' : '280px' }}
+      style={{ width: `${cardWidth}px` }}
     >
       {/* Card */}
       <div
@@ -47,7 +52,7 @@ export default function WishCard({ wish }: Props) {
         )}
 
         <div style={{ transform: `rotate(${textRotation}deg)` }}>
-          <p className="text-xl text-amber-950 leading-snug mb-2" style={{ fontFamily: `'${wish.font_family || 'Caveat'}', cursive` }}>
+          <p className="text-amber-950 leading-snug mb-2" style={{ fontFamily: `'${font}', cursive`, fontSize }}>
             {wish.message}
           </p>
           <p className="font-hand text-sm text-amber-700 text-right">

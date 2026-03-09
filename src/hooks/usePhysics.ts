@@ -29,7 +29,7 @@ function seededRandom(seed: number): number {
 function getPinPositions(wishes: Wish[]): Map<string, { x: number; y: number }> {
   const positions = new Map<string, { x: number; y: number }>()
   const placed: { x: number; y: number }[] = []
-  const spacing = CARD_W + 60
+  const spacing = CARD_W + 200
 
   for (let i = 0; i < wishes.length; i++) {
     const seed = hashCode(wishes[i].id)

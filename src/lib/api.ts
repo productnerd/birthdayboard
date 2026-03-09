@@ -83,7 +83,7 @@ export async function createWish(data: {
       board_id: data.board_id,
       author_name: data.author_name,
       message: data.message,
-      font_family: data.font_family || 'Caveat',
+      font_family: data.font_family || 'Indie Flower',
       rotation_deg: Math.random() * 10 - 5,
       position_x: 0.2 + Math.random() * 0.6,
       position_y: 0.2 + Math.random() * 0.6,
@@ -102,7 +102,11 @@ export async function createWish(data: {
         contentType: data.photo.type || 'image/jpeg',
         upsert: true,
       })
-    if (uploadError) throw uploadError
+    if (uploadError) {
+      // Rollback: delete the wish if image upload failed
+      await supabase.from('birthdayboard_wishes').delete().eq('id', wish.id)
+      throw uploadError
+    }
 
     await supabase
       .from('birthdayboard_wishes')
