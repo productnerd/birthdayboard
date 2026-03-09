@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { useParams } from 'react-router-dom'
+import { useParams, useSearchParams } from 'react-router-dom'
 import { getBoard, getWishes } from '../lib/api'
 import type { Board as BoardType, Wish } from '../lib/types'
 import AddWishForm from '../components/AddWishForm'
@@ -8,10 +8,11 @@ import ShareModal from '../components/ShareModal'
 
 export default function Board() {
   const { slug } = useParams<{ slug: string }>()
+  const [searchParams] = useSearchParams()
   const [board, setBoard] = useState<BoardType | null>(null)
   const [wishes, setWishes] = useState<Wish[]>([])
   const [loading, setLoading] = useState(true)
-  const [showForm, setShowForm] = useState(false)
+  const [showForm, setShowForm] = useState(searchParams.get('addWish') === '1')
   const [hasPosted, setHasPosted] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
 

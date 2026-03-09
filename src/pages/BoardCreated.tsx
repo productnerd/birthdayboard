@@ -39,7 +39,7 @@ export default function BoardCreated() {
         </button>
 
         <a
-          href={`#/board/${slug}`}
+          href={`#/board/${slug}?addWish=1`}
           className="block w-full border-2 border-amber-700 text-amber-700 hover:bg-amber-50 font-handwriting text-xl py-2 rounded-lg transition-colors text-center"
         >
           Write First Wish
