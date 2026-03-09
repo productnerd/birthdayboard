@@ -5,10 +5,11 @@ import type { Wish } from '../lib/types'
 const CARD_W = 300
 const CARD_H = 320
 
-interface CardState {
+export interface CardState {
   x: number
   y: number
   angle: number
+  pinOffsetX: number
 }
 
 function hashCode(s: string): number {
@@ -87,7 +88,7 @@ function getPinPositions(wishes: Wish[]): Map<string, { x: number; y: number }> 
 
 export function usePhysics(wishes: Wish[]) {
   const engineRef = useRef<Matter.Engine | null>(null)
-  const cardsRef = useRef<Map<string, { pin: Matter.Body; card: Matter.Body; constraint: Matter.Constraint }>>(new Map())
+  const cardsRef = useRef<Map<string, { pin: Matter.Body; card: Matter.Body; constraint: Matter.Constraint; pinOffsetX: number }>>(new Map())
   const mouseConstraintRef = useRef<Matter.Constraint | null>(null)
   const mouseBodRef = useRef<Matter.Body | null>(null)
   const rafRef = useRef<number>(0)
@@ -122,6 +123,7 @@ export function usePhysics(wishes: Wish[]) {
           x: bodies.card.position.x,
           y: bodies.card.position.y,
           angle: bodies.card.angle * (180 / Math.PI),
+          pinOffsetX: bodies.pinOffsetX,
         })
       })
       setCardStates(newStates)
@@ -163,10 +165,10 @@ export function usePhysics(wishes: Wish[]) {
       // Off-center pin: offset X by up to ±30% of card width
       const pinOffsetX = (seededRandom(seed + 80) - 0.5) * CARD_W * 0.6
 
-      // Place card so the pin attachment point starts at the pin position
+      // Place card so the pin attachment point (top of card) starts at pin
       const card = Matter.Bodies.rectangle(
         pinPos.x - pinOffsetX,
-        pinPos.y + CARD_H * 0.4,
+        pinPos.y + CARD_H * 0.5,
         CARD_W,
         CARD_H,
         {
@@ -178,18 +180,18 @@ export function usePhysics(wishes: Wish[]) {
         },
       )
 
-      // Pin attaches at top 10% of card, off-center
+      // Pin attaches at the very top of the card, off-center
       const constraint = Matter.Constraint.create({
         bodyA: pin,
         bodyB: card,
-        pointB: { x: pinOffsetX, y: -CARD_H * 0.4 },
+        pointB: { x: pinOffsetX, y: -CARD_H * 0.5 },
         stiffness: 0.9,
         damping: 0.05,
         length: 0,
       })
 
       Matter.Composite.add(engine.world, [pin, card, constraint])
-      existing.set(wish.id, { pin, card, constraint })
+      existing.set(wish.id, { pin, card, constraint, pinOffsetX })
 
       // Small nudge to start swinging
       Matter.Body.applyForce(card, card.position, {

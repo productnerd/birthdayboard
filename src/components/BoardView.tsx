@@ -37,15 +37,11 @@ export default function BoardView({ wishes, board }: Props) {
     endDrag()
   }, [endDrag])
 
-  // Calculate bounds from actual card positions — generous margins to prevent cropping
+  // Calculate bounds — cards hang downward from pins, so use pin positions + generous card height
   let maxX = 1200, maxY = 800
-  cardStates.forEach((state) => {
-    maxX = Math.max(maxX, state.x + 400)
-    maxY = Math.max(maxY, state.y + 400)
-  })
   pinPositions.forEach((pos) => {
-    maxX = Math.max(maxX, pos.x + 400)
-    maxY = Math.max(maxY, pos.y + 500)
+    maxX = Math.max(maxX, pos.x + 500)
+    maxY = Math.max(maxY, pos.y + 900)
   })
 
   return (
@@ -86,19 +82,28 @@ export default function BoardView({ wishes, board }: Props) {
           )
         })}
 
-        {/* Cards */}
+        {/* Cards — positioned at pin, hanging downward */}
         {wishes.map((wish) => {
           const state = cardStates.get(wish.id)
-          if (!state) return null
+          const pinPos = pinPositions.get(wish.id)
+          if (!state || !pinPos) return null
+
+          // Pin offset from card center (stored in state)
+          const offsetX = state.pinOffsetX
+          // Card width for transform-origin calculation
+          const cardW = wish.photo_path ? 300 : 280
+          // Pin attachment point as percentage from left edge of card
+          const originX = ((cardW / 2 + offsetX) / cardW) * 100
 
           return (
             <div
               key={wish.id}
               className="absolute cursor-grab active:cursor-grabbing select-none z-10"
               style={{
-                left: state.x,
-                top: state.y,
-                transform: `translate(-50%, -50%) rotate(${state.angle}deg)`,
+                left: pinPos.x - (cardW / 2 + offsetX),
+                top: pinPos.y,
+                transform: `rotate(${state.angle}deg)`,
+                transformOrigin: `${originX}% 0%`,
               }}
               onPointerDown={(e) => handlePointerDown(wish.id, e)}
             >
