@@ -1,7 +1,6 @@
 import { useRef, useCallback } from 'react'
 import type { Board, Wish } from '../lib/types'
 import WishCard from './WishCard'
-import PersonPhoto from './PersonPhoto'
 import { usePhysics } from '../hooks/usePhysics'
 
 interface Props {
@@ -57,13 +56,6 @@ export default function BoardView({ wishes, board }: Props) {
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        {/* Person photo */}
-        {board.person_image_path && (
-          <div className="absolute top-2 left-1/2 -translate-x-1/2 z-20">
-            <PersonPhoto path={board.person_image_path} name={board.person_name} />
-          </div>
-        )}
-
         {/* Pins */}
         {wishes.map((wish) => {
           const pinPos = pinPositions.get(wish.id)

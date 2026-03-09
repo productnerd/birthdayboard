@@ -1,4 +1,4 @@
-import { useState, useRef, type FormEvent } from 'react'
+import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createBoard } from '../lib/api'
 
@@ -6,8 +6,6 @@ export default function CreateBoard() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
-  const [fileName, setFileName] = useState('')
-  const fileRef = useRef<HTMLInputElement>(null)
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -15,9 +13,6 @@ export default function CreateBoard() {
     setError('')
 
     const form = new FormData(e.currentTarget)
-    const personImage = (form.get('person_image') as File)?.size
-      ? (form.get('person_image') as File)
-      : undefined
 
     try {
       const month = String(form.get('birthday_month')).padStart(2, '0')
@@ -30,7 +25,6 @@ export default function CreateBoard() {
         creator_name: form.get('creator_name') as string,
         creator_email: form.get('creator_email') as string,
         prompt_note: form.get('prompt_note') as string,
-        person_image: personImage,
       })
       navigate(`/created/${board.slug}`)
     } catch (err: unknown) {
@@ -110,28 +104,6 @@ export default function CreateBoard() {
             placeholder="you@example.com"
           />
         </label>
-
-        <div className="block mb-4">
-          <span className="text-amber-800 text-lg">Photo of them (optional)</span>
-          <input
-            ref={fileRef}
-            name="person_image"
-            type="file"
-            accept="image/*"
-            className="hidden"
-            onChange={(e) => setFileName(e.target.files?.[0]?.name || '')}
-          />
-          <div className="flex items-center gap-3 mt-1">
-            <button
-              type="button"
-              onClick={() => fileRef.current?.click()}
-              className="px-4 py-2 rounded border border-amber-300 bg-amber-50 text-amber-800 font-hand text-lg hover:bg-amber-100 transition-colors"
-            >
-              Choose Photo
-            </button>
-            {fileName && <span className="text-amber-700 font-hand text-sm truncate">{fileName}</span>}
-          </div>
-        </div>
 
         <label className="block mb-6">
           <span className="text-amber-800 text-lg">Prompt for friends (optional)</span>
