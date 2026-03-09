@@ -56,7 +56,7 @@ export default function BoardView({ wishes, board }: Props) {
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        {/* Pins */}
+        {/* Pins — rendered inside the card's top area */}
         {wishes.map((wish) => {
           const pinPos = pinPositions.get(wish.id)
           if (!pinPos) return null
@@ -67,7 +67,7 @@ export default function BoardView({ wishes, board }: Props) {
               className="absolute w-4 h-4 rounded-full shadow-md z-30"
               style={{
                 left: pinPos.x - 8,
-                top: pinPos.y - 8,
+                top: pinPos.y + 8,
                 background: 'radial-gradient(circle at 35% 35%, #444, #111)',
               }}
             />

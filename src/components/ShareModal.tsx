@@ -43,12 +43,6 @@ export default function ShareModal({ shareUrl, personName, onClose }: Props) {
           {copied ? 'Copied!' : 'Copy Link'}
         </button>
 
-        <button
-          onClick={onClose}
-          className="w-full font-hand text-amber-700 hover:text-amber-900 text-sm"
-        >
-          Close
-        </button>
       </div>
     </div>
   )

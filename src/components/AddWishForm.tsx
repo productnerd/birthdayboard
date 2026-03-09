@@ -132,7 +132,7 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
       </div>
 
       <div className="block mb-4">
-        <span className="text-amber-800 font-hand">Add a photo or GIF (optional)</span>
+        {!photoPreview && <span className="text-amber-800 font-hand">Add a photo or GIF (optional)</span>}
         <input
           ref={photoRef}
           name="photo"
