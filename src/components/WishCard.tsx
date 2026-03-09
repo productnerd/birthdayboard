@@ -23,8 +23,9 @@ export default function WishCard({ wish }: Props) {
   const polaroidRotation = seededRandom(seed + 10) * 6 - 3
   const textRotation = seededRandom(seed + 20) * 2 - 1
 
-  // Random card width between 260-340px, seeded per wish
-  const cardWidth = 260 + seededRandom(seed + 30) * 80
+  // Random card width: min 312px, bias wider for long messages
+  const textBonus = Math.min(wish.message.length / 3, 60)
+  const cardWidth = 312 + seededRandom(seed + 30) * 80 + textBonus
   const font = wish.font_family || 'Indie Flower'
   const fontSize = font === 'Reenie Beanie' ? '1.5rem' : '1.25rem'
 

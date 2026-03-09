@@ -98,7 +98,7 @@ export function usePhysics(wishes: Wish[]) {
   // Init engine
   useEffect(() => {
     const engine = Matter.Engine.create({
-      gravity: { x: 0, y: 1, scale: 0.006 },
+      gravity: { x: 0, y: 1, scale: 0.018 },
     })
     engineRef.current = engine
 
@@ -173,7 +173,7 @@ export function usePhysics(wishes: Wish[]) {
         CARD_H,
         {
           mass: 2,
-          frictionAir: 0.03,
+          frictionAir: 0.015,
           angle: 0,
           restitution: 0.1,
           collisionFilter: { group: -1 },
