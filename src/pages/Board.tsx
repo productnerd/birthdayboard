@@ -66,7 +66,7 @@ export default function Board() {
       {/* Share button — top right */}
       <button
         onClick={() => { copyShareUrl(); setShowShareModal(true) }}
-        className="fixed top-4 right-4 z-50 bg-amber-700/90 hover:bg-amber-800 text-white font-hand px-4 py-2 rounded-lg transition-colors text-sm"
+        className="fixed top-4 right-4 z-50 bg-amber-900/90 hover:bg-amber-950 text-white font-hand px-4 py-2 rounded-lg transition-colors text-sm"
       >
         Share Board
       </button>
@@ -77,22 +77,22 @@ export default function Board() {
           Happy Birthday, {board.person_name}!
         </h1>
         {board.prompt_note && (
-          <p className="font-hand text-xl text-amber-800 mt-2 italic">
+          <p className="font-hand text-xl text-amber-950 mt-2 italic">
             "{board.prompt_note}"
           </p>
         )}
-        <p className="font-hand text-amber-700 mt-1">
+        <p className="font-hand text-amber-950 mt-1">
           — organized by {board.creator_name}
         </p>
 
         {hasPosted ? (
-          <p className="mt-4 font-hand text-lg text-amber-700 italic">
+          <p className="mt-4 font-hand text-lg text-amber-950 italic">
             You've already left your wish!
           </p>
         ) : (
           <button
             onClick={() => setShowForm(!showForm)}
-            className="mt-4 bg-amber-700 hover:bg-amber-800 text-white font-handwriting text-xl px-6 py-2 rounded-lg transition-colors"
+            className="mt-4 bg-amber-900 hover:bg-amber-950 text-white font-handwriting text-xl px-6 py-2 rounded-lg transition-colors"
           >
             {showForm ? 'Close' : 'Add a Wish'}
           </button>

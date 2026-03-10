@@ -23,7 +23,7 @@ export default function BoardCreated() {
           Board Created!
         </h1>
 
-        <p className="text-amber-800 text-lg font-hand mb-6">
+        <p className="text-amber-950 text-lg font-hand mb-6">
           Share this link with friends so they can leave birthday wishes:
         </p>
 
@@ -33,14 +33,14 @@ export default function BoardCreated() {
 
         <button
           onClick={copyUrl}
-          className="w-full bg-amber-700 hover:bg-amber-800 text-white font-handwriting text-2xl py-3 rounded-lg transition-colors mb-4"
+          className="w-full bg-amber-900 hover:bg-amber-950 text-white font-handwriting text-2xl py-3 rounded-lg transition-colors mb-4"
         >
           {copied ? 'Copied!' : 'Copy Link'}
         </button>
 
         <a
           href={`#/board/${slug}?addWish=1`}
-          className="block w-full border-2 border-amber-700 text-amber-700 hover:bg-amber-50 font-handwriting text-xl py-2 rounded-lg transition-colors text-center"
+          className="block w-full border-2 border-amber-900 text-amber-900 hover:bg-amber-50 font-handwriting text-xl py-2 rounded-lg transition-colors text-center"
         >
           Write First Wish
         </a>

@@ -1,5 +1,6 @@
 import { useState, useRef, type FormEvent } from 'react'
 import { createWish } from '../lib/api'
+import { compressImage } from '../lib/compress'
 import type { Wish } from '../lib/types'
 
 const FONTS = [
@@ -22,6 +23,7 @@ interface Props {
 
 export default function AddWishForm({ boardId, onWishAdded }: Props) {
   const [loading, setLoading] = useState(false)
+  const [compressing, setCompressing] = useState(false)
   const [error, setError] = useState('')
   const [photo, setPhoto] = useState<File | null>(null)
   const [photoPreview, setPhotoPreview] = useState<string | null>(null)
@@ -31,6 +33,7 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
 
   const currentFont = FONTS[fontIndex]
   const textareaFontSize = currentFont === 'Reenie Beanie' ? '1.5rem' : '1.25rem'
+  const busy = loading || compressing
 
   function prevFont() {
     setFontIndex((i) => (i - 1 + FONTS.length) % FONTS.length)
@@ -40,12 +43,14 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
     setFontIndex((i) => (i + 1) % FONTS.length)
   }
 
-  function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
+  async function handlePhotoChange(e: React.ChangeEvent<HTMLInputElement>) {
     const file = e.target.files?.[0]
-    if (file) {
-      setPhoto(file)
-      setPhotoPreview(URL.createObjectURL(file))
-    }
+    if (!file) return
+    setPhotoPreview(URL.createObjectURL(file))
+    setCompressing(true)
+    const compressed = await compressImage(file)
+    setPhoto(compressed)
+    setCompressing(false)
   }
 
   function removePhoto() {
@@ -84,7 +89,7 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
       style={{ transform: 'rotate(1deg)' }}
     >
       <label className="block mb-3">
-        <span className="text-amber-800 font-hand">Your name</span>
+        <span className="text-amber-950 font-hand">Your name</span>
         <input
           name="author_name"
           required
@@ -94,7 +99,7 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
       </label>
 
       <label className="block mb-1">
-        <span className="text-amber-800 font-hand">Your message</span>
+        <span className="text-amber-950 font-hand">Your message</span>
         <textarea
           name="message"
           required
@@ -112,12 +117,12 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
         <button
           type="button"
           onClick={prevFont}
-          className="w-8 h-8 flex items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors text-lg"
+          className="w-8 h-8 flex items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 transition-colors text-lg"
         >
           &lsaquo;
         </button>
         <span
-          className="text-lg text-amber-700 px-2 text-center"
+          className="text-lg text-amber-950 px-2 text-center"
           style={{ fontFamily: `'${currentFont}', cursive` }}
         >
           {currentFont}
@@ -125,14 +130,14 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
         <button
           type="button"
           onClick={nextFont}
-          className="w-8 h-8 flex items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-800 hover:bg-amber-100 transition-colors text-lg"
+          className="w-8 h-8 flex items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 transition-colors text-lg"
         >
           &rsaquo;
         </button>
       </div>
 
       <div className="block mb-4">
-        {!photoPreview && <span className="text-amber-800 font-hand">Add a photo or GIF (optional)</span>}
+        {!photoPreview && <span className="text-amber-950 font-hand">Add a photo or GIF (optional)</span>}
         <input
           ref={photoRef}
           name="photo"
@@ -155,13 +160,14 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
             >
               &times;
             </button>
+            {compressing && <span className="text-xs text-amber-950 ml-2">Compressing...</span>}
           </div>
         ) : (
           <div className="mt-1">
             <button
               type="button"
               onClick={() => photoRef.current?.click()}
-              className="px-4 py-2 rounded border border-amber-300 bg-amber-50 text-amber-800 font-hand hover:bg-amber-100 transition-colors"
+              className="px-4 py-2 rounded border border-amber-300 bg-amber-50 text-amber-950 font-hand hover:bg-amber-100 transition-colors"
             >
               Choose Photo
             </button>
@@ -175,10 +181,10 @@ export default function AddWishForm({ boardId, onWishAdded }: Props) {
 
       <button
         type="submit"
-        disabled={loading}
-        className="w-full bg-amber-700 hover:bg-amber-800 text-white font-handwriting text-xl py-2 rounded-lg transition-colors disabled:opacity-50"
+        disabled={busy}
+        className="w-full bg-amber-900 hover:bg-amber-950 text-white font-handwriting text-xl py-2 rounded-lg transition-colors disabled:opacity-50"
       >
-        {loading ? 'Posting...' : 'Post Wish'}
+        {loading ? 'Posting...' : compressing ? 'Preparing image...' : 'Post Wish'}
       </button>
     </form>
   )

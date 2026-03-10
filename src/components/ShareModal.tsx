@@ -28,7 +28,7 @@ export default function ShareModal({ shareUrl, personName, onClose }: Props) {
         <h3 className="font-handwriting text-2xl text-amber-900 mb-2 text-center">
           Wish posted!
         </h3>
-        <p className="font-hand text-amber-800 text-center mb-4">
+        <p className="font-hand text-amber-950 text-center mb-4">
           Know 2-3 more friends who'd want to wish {personName} a happy birthday? Share this link with them!
         </p>
 
@@ -38,7 +38,7 @@ export default function ShareModal({ shareUrl, personName, onClose }: Props) {
 
         <button
           onClick={copyUrl}
-          className="w-full bg-amber-700 hover:bg-amber-800 text-white font-handwriting text-xl py-2 rounded-lg transition-colors mb-3"
+          className="w-full bg-amber-900 hover:bg-amber-950 text-white font-handwriting text-xl py-2 rounded-lg transition-colors mb-3"
         >
           {copied ? 'Copied!' : 'Copy Link'}
         </button>

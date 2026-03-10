@@ -56,7 +56,7 @@ export default function WishCard({ wish }: Props) {
           <p className="text-amber-950 leading-snug mb-2" style={{ fontFamily: `'${font}', cursive`, fontSize }}>
             {wish.message}
           </p>
-          <p className="font-hand text-sm text-amber-700 text-right">
+          <p className="text-sm text-amber-950 text-right" style={{ fontFamily: `'${font}', cursive` }}>
             — {wish.author_name}
           </p>
         </div>

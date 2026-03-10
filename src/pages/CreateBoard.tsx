@@ -49,7 +49,7 @@ export default function CreateBoard() {
         </h1>
 
         <label className="block mb-4">
-          <span className="text-amber-800 text-lg">Who's the birthday person?</span>
+          <span className="text-amber-950 text-lg">Who's the birthday person?</span>
           <input
             name="person_name"
             required
@@ -59,7 +59,7 @@ export default function CreateBoard() {
         </label>
 
         <div className="block mb-4">
-          <span className="text-amber-800 text-lg">Birthday date</span>
+          <span className="text-amber-950 text-lg">Birthday date</span>
           <div className="flex gap-3 mt-1">
             <select
               name="birthday_month"
@@ -85,7 +85,7 @@ export default function CreateBoard() {
         </div>
 
         <label className="block mb-4">
-          <span className="text-amber-800 text-lg">Your name (the organizer)</span>
+          <span className="text-amber-950 text-lg">Your name (the organizer)</span>
           <input
             name="creator_name"
             required
@@ -95,7 +95,7 @@ export default function CreateBoard() {
         </label>
 
         <label className="block mb-4">
-          <span className="text-amber-800 text-lg">Your email (for notifications)</span>
+          <span className="text-amber-950 text-lg">Your email (for notifications)</span>
           <input
             name="creator_email"
             type="email"
@@ -106,7 +106,7 @@ export default function CreateBoard() {
         </label>
 
         <label className="block mb-6">
-          <span className="text-amber-800 text-lg">Prompt for friends (optional)</span>
+          <span className="text-amber-950 text-lg">Prompt for friends (optional)</span>
           <textarea
             name="prompt_note"
             rows={2}
@@ -122,7 +122,7 @@ export default function CreateBoard() {
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-amber-700 hover:bg-amber-800 text-white font-handwriting text-2xl py-3 rounded-lg transition-colors disabled:opacity-50"
+          className="w-full bg-amber-900 hover:bg-amber-950 text-white font-handwriting text-2xl py-3 rounded-lg transition-colors disabled:opacity-50"
         >
           {loading ? 'Creating...' : 'Create Board'}
         </button>
