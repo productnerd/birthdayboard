@@ -128,7 +128,7 @@ export function usePhysics(wishes: Wish[]) {
   // Init engine
   useEffect(() => {
     const engine = Matter.Engine.create({
-      gravity: { x: 0, y: 1, scale: 0.008 },
+      gravity: { x: 0, y: 1, scale: 0.001 },
     })
     engineRef.current = engine
 
@@ -196,10 +196,10 @@ export function usePhysics(wishes: Wish[]) {
         layout.cardW,
         layout.cardH,
         {
-          mass: 3,
-          frictionAir: 0.04,
+          mass: 1.5,
+          frictionAir: 0.008,
           angle: 0,
-          restitution: 0.05,
+          restitution: 0.15,
           collisionFilter: { group: -1 },
         },
       )
@@ -208,8 +208,8 @@ export function usePhysics(wishes: Wish[]) {
         bodyA: pin,
         bodyB: card,
         pointB: { x: layout.pinOffsetX, y: -layout.cardH * 0.5 },
-        stiffness: 0.95,
-        damping: 0.15,
+        stiffness: 0.7,
+        damping: 0.03,
         length: 0,
       })
 
@@ -217,7 +217,7 @@ export function usePhysics(wishes: Wish[]) {
       existing.set(wish.id, { pin, card, constraint, pinOffsetX: layout.pinOffsetX })
 
       Matter.Body.applyForce(card, card.position, {
-        x: (seededRandom(seed + 70) - 0.5) * 0.008,
+        x: (seededRandom(seed + 70) - 0.5) * 0.015,
         y: 0,
       })
     })
@@ -235,7 +235,7 @@ export function usePhysics(wishes: Wish[]) {
     const interval = setInterval(() => {
       cardsRef.current.forEach((bodies) => {
         Matter.Body.applyForce(bodies.card, bodies.card.position, {
-          x: (Math.random() - 0.5) * 0.001,
+          x: (Math.random() - 0.5) * 0.003,
           y: 0,
         })
       })
