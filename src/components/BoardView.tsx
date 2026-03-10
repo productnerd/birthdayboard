@@ -1,14 +1,13 @@
 import { useRef, useCallback } from 'react'
-import type { Board, Wish } from '../lib/types'
+import type { Wish } from '../lib/types'
 import WishCard from './WishCard'
 import { usePhysics } from '../hooks/usePhysics'
 
 interface Props {
   wishes: Wish[]
-  board: Board
 }
 
-export default function BoardView({ wishes, board }: Props) {
+export default function BoardView({ wishes }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
   const { cardStates, pinPositions, startDrag, moveDrag, endDrag } = usePhysics(wishes)
 

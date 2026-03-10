@@ -107,7 +107,7 @@ export default function Board() {
       )}
 
       {/* Board */}
-      <BoardView wishes={wishes} board={board} />
+      <BoardView wishes={wishes} />
 
       {/* Share modal */}
       {showShareModal && (
