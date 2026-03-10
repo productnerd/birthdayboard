@@ -107,8 +107,8 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
       const mouseX = e.clientX - rect.left
       const mouseY = e.clientY - rect.top
 
-      // Zoom toward mouse position
-      const zoomFactor = e.deltaY > 0 ? 0.92 : 1.08
+      // Zoom toward mouse position — use deltaY magnitude for smooth trackpad
+      const zoomFactor = 1 - e.deltaY * 0.002
       setScale(prev => {
         const newScale = Math.min(3, Math.max(0.1, prev * zoomFactor))
         const ratio = newScale / prev
