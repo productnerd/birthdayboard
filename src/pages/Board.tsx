@@ -1,9 +1,10 @@
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams, useSearchParams } from 'react-router-dom'
 import { getBoard, getWishes } from '../lib/api'
 import type { Board as BoardType, Wish } from '../lib/types'
 import AddWishForm from '../components/AddWishForm'
 import BoardView from '../components/BoardView'
+import type { BoardViewHandle } from '../components/BoardView'
 import ShareModal from '../components/ShareModal'
 
 export default function Board() {
@@ -15,6 +16,7 @@ export default function Board() {
   const [showForm, setShowForm] = useState(searchParams.get('addWish') === '1')
   const [hasPosted, setHasPosted] = useState(false)
   const [showShareModal, setShowShareModal] = useState(false)
+  const boardViewRef = useRef<BoardViewHandle>(null)
 
   const shareUrl = `${window.location.origin}${import.meta.env.BASE_URL}#/board/${slug}`
 
@@ -39,6 +41,8 @@ export default function Board() {
     setHasPosted(true)
     localStorage.setItem(`bb-posted-${slug}`, '1')
     setShowShareModal(true)
+    // Focus on new wish after layout recalculates
+    setTimeout(() => boardViewRef.current?.focusWish(wish.id), 100)
   }
 
   function copyShareUrl() {
@@ -100,7 +104,7 @@ export default function Board() {
       </div>
 
       {/* Board — always behind the form */}
-      <BoardView wishes={wishes} />
+      <BoardView ref={boardViewRef} wishes={wishes} />
 
       {/* Add wish form — overlays on top */}
       {showForm && (
