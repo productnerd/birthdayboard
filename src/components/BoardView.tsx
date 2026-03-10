@@ -27,6 +27,11 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
   const isPanning = useRef(false)
   const lastPan = useRef({ x: 0, y: 0 })
 
+  // Track mouse drag-to-pan on canvas
+  const isMousePanning = useRef(false)
+  const lastMouse = useRef({ x: 0, y: 0 })
+  const isDraggingCard = useRef(false)
+
   // Calculate board bounds from layouts
   let boardW = 1200, boardH = 800
   cardLayouts.forEach((layout) => {
@@ -182,8 +187,10 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
     }
   }, [])
 
-  const handlePointerDown = useCallback(
+  const handleCardPointerDown = useCallback(
     (wishId: string, e: React.PointerEvent) => {
+      e.stopPropagation()
+      isDraggingCard.current = true
       const inner = innerRef.current
       if (!inner) return
       const rect = inner.getBoundingClientRect()
@@ -193,8 +200,9 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
     [startDrag],
   )
 
-  const handlePointerMove = useCallback(
+  const handleCardPointerMove = useCallback(
     (e: React.PointerEvent) => {
+      if (!isDraggingCard.current) return
       const inner = innerRef.current
       if (!inner) return
       moveDrag(e.clientX, e.clientY, inner.getBoundingClientRect())
@@ -202,15 +210,41 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
     [moveDrag],
   )
 
-  const handlePointerUp = useCallback(() => {
+  const handleCardPointerUp = useCallback(() => {
+    isDraggingCard.current = false
     endDrag()
   }, [endDrag])
+
+  // Canvas mouse drag-to-pan
+  const handleCanvasPointerDown = useCallback((e: React.PointerEvent) => {
+    // Only left mouse button, and only if not on a card
+    if (e.button !== 0 || e.pointerType === 'touch') return
+    isMousePanning.current = true
+    lastMouse.current = { x: e.clientX, y: e.clientY }
+  }, [])
+
+  const handleCanvasPointerMove = useCallback((e: React.PointerEvent) => {
+    if (!isMousePanning.current) return
+    const dx = e.clientX - lastMouse.current.x
+    const dy = e.clientY - lastMouse.current.y
+    setTranslateX(tx => tx + dx)
+    setTranslateY(ty => ty + dy)
+    lastMouse.current = { x: e.clientX, y: e.clientY }
+  }, [])
+
+  const handleCanvasPointerUp = useCallback(() => {
+    isMousePanning.current = false
+  }, [])
 
   return (
     <div
       ref={containerRef}
-      className="w-full overflow-hidden"
+      className="w-full overflow-hidden cursor-grab active:cursor-grabbing"
       style={{ height: 'calc(100vh - 180px)' }}
+      onPointerDown={handleCanvasPointerDown}
+      onPointerMove={handleCanvasPointerMove}
+      onPointerUp={handleCanvasPointerUp}
+      onPointerLeave={handleCanvasPointerUp}
     >
       <div
         ref={innerRef}
@@ -222,9 +256,6 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
           transformOrigin: '0 0',
           transition: 'transform 0.3s ease-out',
         }}
-        onPointerMove={handlePointerMove}
-        onPointerUp={handlePointerUp}
-        onPointerLeave={handlePointerUp}
       >
         {wishes.map((wish) => {
           const state = cardStates.get(wish.id)
@@ -245,7 +276,9 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
                 transform: `rotate(${state.angle}deg)`,
                 transformOrigin: `${originX}% 12px`,
               }}
-              onPointerDown={(e) => handlePointerDown(wish.id, e)}
+              onPointerDown={(e) => handleCardPointerDown(wish.id, e)}
+              onPointerMove={handleCardPointerMove}
+              onPointerUp={handleCardPointerUp}
             >
               <WishCard wish={wish} pinOffsetX={state.pinOffsetX} />
             </div>
