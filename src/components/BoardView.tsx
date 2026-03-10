@@ -45,7 +45,7 @@ export default function BoardView({ wishes }: Props) {
   return (
     <div
       className="w-full overflow-auto"
-      style={{ height: 'calc(100vh - 180px)' }}
+      style={{ minHeight: 'calc(100vh - 180px)' }}
     >
       <div
         ref={containerRef}
@@ -55,24 +55,6 @@ export default function BoardView({ wishes }: Props) {
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        {/* Pins — rendered inside the card's top area */}
-        {wishes.map((wish) => {
-          const pinPos = pinPositions.get(wish.id)
-          if (!pinPos) return null
-
-          return (
-            <div
-              key={`pin-${wish.id}`}
-              className="absolute w-4 h-4 rounded-full shadow-md z-30"
-              style={{
-                left: pinPos.x - 8,
-                top: pinPos.y + 8,
-                background: 'radial-gradient(circle at 35% 35%, #444, #111)',
-              }}
-            />
-          )
-        })}
-
         {/* Cards — positioned at pin, hanging downward */}
         {wishes.map((wish) => {
           const state = cardStates.get(wish.id)
@@ -98,7 +80,7 @@ export default function BoardView({ wishes }: Props) {
               }}
               onPointerDown={(e) => handlePointerDown(wish.id, e)}
             >
-              <WishCard wish={wish} />
+              <WishCard wish={wish} pinOffsetX={state.pinOffsetX} />
             </div>
           )
         })}

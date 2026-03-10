@@ -3,6 +3,7 @@ import { getPublicUrl } from '../lib/storage'
 
 interface Props {
   wish: Wish
+  pinOffsetX?: number
 }
 
 function seededRandom(seed: number): number {
@@ -18,7 +19,7 @@ function hashCode(s: string): number {
   return Math.abs(h)
 }
 
-export default function WishCard({ wish }: Props) {
+export default function WishCard({ wish, pinOffsetX = 0 }: Props) {
   const seed = hashCode(wish.id)
   const polaroidRotation = seededRandom(seed + 10) * 6 - 3
   const textRotation = seededRandom(seed + 20) * 2 - 1
@@ -29,14 +30,27 @@ export default function WishCard({ wish }: Props) {
   const font = wish.font_family || 'Indie Flower'
   const fontSize = font === 'Reenie Beanie' ? '1.5rem' : '1.25rem'
 
+  // Pin position on card: centered + offset
+  const pinLeft = cardWidth / 2 + pinOffsetX
+
   return (
     <div
       className="relative"
       style={{ width: `${cardWidth}px` }}
     >
+      {/* Decorative pin — always on the card */}
+      <div
+        className="absolute z-10 w-5 h-5 rounded-full shadow-md"
+        style={{
+          left: pinLeft - 10,
+          top: 6,
+          background: 'radial-gradient(circle at 35% 35%, #c0392b, #7b241c)',
+          boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.3)',
+        }}
+      />
       {/* Card */}
       <div
-        className="paper-card rounded-xl p-5 overflow-hidden"
+        className="paper-card rounded-xl p-5 pt-8"
         style={{ wordBreak: 'break-word' }}
       >
         {wish.photo_path && (

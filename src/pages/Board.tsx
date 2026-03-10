@@ -99,15 +99,15 @@ export default function Board() {
         )}
       </div>
 
-      {/* Add wish form */}
+      {/* Board — always behind the form */}
+      <BoardView wishes={wishes} />
+
+      {/* Add wish form — overlays on top */}
       {showForm && (
-        <div className="flex justify-center px-4 pb-6">
+        <div className="fixed inset-0 z-40 flex items-center justify-center bg-black/30">
           <AddWishForm boardId={board.id} onWishAdded={handleWishAdded} />
         </div>
       )}
-
-      {/* Board */}
-      <BoardView wishes={wishes} />
 
       {/* Share modal */}
       {showShareModal && (
