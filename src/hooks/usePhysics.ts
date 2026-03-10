@@ -2,14 +2,20 @@ import { useEffect, useRef, useCallback, useState } from 'react'
 import Matter from 'matter-js'
 import type { Wish } from '../lib/types'
 
-const CARD_W = 300
-const CARD_H = 320
-
 export interface CardState {
   x: number
   y: number
   angle: number
   pinOffsetX: number
+}
+
+export interface CardLayout {
+  pinX: number
+  pinY: number
+  cardW: number
+  cardH: number
+  pinOffsetX: number
+  rotation: number
 }
 
 function hashCode(s: string): number {
@@ -25,65 +31,125 @@ function seededRandom(seed: number): number {
   return x - Math.floor(x)
 }
 
-// Organic pin placement: spiral outward, no overlap
-function getPinPositions(wishes: Wish[]): Map<string, { x: number; y: number }> {
-  const positions = new Map<string, { x: number; y: number }>()
-  const placed: { x: number; y: number }[] = []
-  const spacing = CARD_W + 200
+// Estimate card dimensions based on content
+function estimateCardSize(wish: Wish, seed: number): { w: number; h: number } {
+  const textBonus = Math.min(wish.message.length / 3, 60)
+  const w = 312 + seededRandom(seed + 30) * 80 + textBonus
+
+  // Estimate height: base padding + text lines + photo
+  const charsPerLine = w / 14 // rough estimate
+  const lines = Math.ceil(wish.message.length / charsPerLine)
+  const textH = lines * 28 + 40 // line height + author line
+  const photoH = wish.photo_path ? 220 : 0
+  const paddingH = 60 // pt-8 + p-5 + margins
+  const h = textH + photoH + paddingH
+
+  return { w, h }
+}
+
+// Place cards in a non-overlapping layout with organic randomness
+function layoutCards(wishes: Wish[]): Map<string, CardLayout> {
+  const layouts = new Map<string, CardLayout>()
+  const placed: { x: number; y: number; w: number; h: number }[] = []
+  const GAP = 40 // minimum gap between cards
 
   for (let i = 0; i < wishes.length; i++) {
-    const seed = hashCode(wishes[i].id)
+    const wish = wishes[i]
+    const seed = hashCode(wish.id)
+    const { w, h } = estimateCardSize(wish, seed)
+
+    // Pin offset: ±50% from center
+    const pinOffsetX = (seededRandom(seed + 80) - 0.5) * w * 0.5
+
+    // Small random rotation for visual variety
+    const rotation = (seededRandom(seed + 90) - 0.5) * 6
+
+    // Find a non-overlapping position
+    let bestX = 0
+    let bestY = 0
 
     if (i === 0) {
-      const pos = { x: 500, y: 60 }
-      positions.set(wishes[i].id, pos)
-      placed.push(pos)
-      continue
-    }
+      // First card: top-left area with some random offset
+      bestX = 80 + seededRandom(seed + 40) * 100
+      bestY = 20 + seededRandom(seed + 41) * 40
+    } else {
+      // Try to place: scan positions, pick first that doesn't overlap
+      let found = false
 
-    // Pick anchor from existing
-    const anchorIdx = seed % placed.length
-    const anchor = placed[anchorIdx]
+      // Strategy: try positions in a scattered grid pattern
+      const cols = Math.max(2, Math.ceil(Math.sqrt(wishes.length + 1)))
+      const colW = w + GAP
+      const rowH = 450 // generous row height
 
-    // Try multiple angles to find non-overlapping spot
-    let bestCandidate = { x: anchor.x + spacing, y: anchor.y }
-    const baseAngle = seededRandom(seed) * Math.PI * 2
+      // Preferred column and row based on index with randomness
+      const preferredCol = i % cols
+      const preferredRow = Math.floor(i / cols)
 
-    for (let attempt = 0; attempt < 12; attempt++) {
-      const angle = baseAngle + (attempt * Math.PI * 2) / 12
-      const dist = spacing + seededRandom(seed + attempt + 1) * 100
-      const candidate = {
-        x: anchor.x + Math.cos(angle) * dist,
-        y: anchor.y + Math.sin(angle) * (dist * 0.3) + (seededRandom(seed + attempt + 10) - 0.5) * 60,
-      }
+      // Try preferred position first, then nearby positions
+      for (let attempt = 0; attempt < 30 && !found; attempt++) {
+        let tryCol: number, tryRow: number
 
-      // Check if far enough from all existing
-      let tooClose = false
-      for (const existing of placed) {
-        const dx = candidate.x - existing.x
-        const dy = candidate.y - existing.y
-        if (Math.abs(dx) < spacing && Math.abs(dy) < CARD_H * 0.8) {
-          tooClose = true
-          break
+        if (attempt === 0) {
+          tryCol = preferredCol
+          tryRow = preferredRow
+        } else {
+          // Spiral outward from preferred position
+          const spiralAngle = seededRandom(seed + attempt) * Math.PI * 2
+          const spiralDist = Math.ceil(attempt / 6)
+          tryCol = preferredCol + Math.round(Math.cos(spiralAngle) * spiralDist)
+          tryRow = preferredRow + Math.round(Math.sin(spiralAngle) * spiralDist)
+        }
+
+        if (tryCol < 0) tryCol = 0
+        if (tryRow < 0) tryRow = 0
+
+        // Add random jitter for organic feel
+        const jitterX = (seededRandom(seed + attempt * 3 + 50) - 0.5) * 80
+        const jitterY = (seededRandom(seed + attempt * 3 + 51) - 0.5) * 60
+
+        const candidateX = tryCol * colW + 80 + jitterX
+        const candidateY = tryRow * rowH + 20 + jitterY
+
+        if (candidateX < 0 || candidateY < 0) continue
+
+        // Check overlap with all placed cards
+        let overlaps = false
+        for (const p of placed) {
+          const overlapX = candidateX < p.x + p.w + GAP && candidateX + w + GAP > p.x
+          const overlapY = candidateY < p.y + p.h + GAP && candidateY + h + GAP > p.y
+          if (overlapX && overlapY) {
+            overlaps = true
+            break
+          }
+        }
+
+        if (!overlaps) {
+          bestX = candidateX
+          bestY = candidateY
+          found = true
         }
       }
 
-      if (!tooClose) {
-        bestCandidate = candidate
-        break
+      // Fallback: place below all existing cards
+      if (!found) {
+        let maxBottom = 0
+        for (const p of placed) {
+          maxBottom = Math.max(maxBottom, p.y + p.h + GAP)
+        }
+        bestX = 80 + (seededRandom(seed + 60) * 200)
+        bestY = maxBottom + 20
       }
-      bestCandidate = candidate
     }
 
-    // Ensure pins stay in reasonable range — enough margin so cards aren't cropped
-    bestCandidate.x = Math.max(CARD_W * 0.6, bestCandidate.x)
-    bestCandidate.y = Math.max(40, Math.min(180, bestCandidate.y))
+    // Pin position in absolute coordinates
+    const pinX = bestX + w / 2 + pinOffsetX
+    const pinY = bestY + 12 // pin sits near top of card
 
-    positions.set(wishes[i].id, bestCandidate)
-    placed.push(bestCandidate)
+    layouts.set(wish.id, { pinX, pinY, cardW: w, cardH: h, pinOffsetX, rotation })
+    placed.push({ x: bestX, y: bestY, w, h })
   }
 
-  return positions
+  return layouts
 }
 
 export function usePhysics(wishes: Wish[]) {
@@ -93,12 +159,12 @@ export function usePhysics(wishes: Wish[]) {
   const mouseBodRef = useRef<Matter.Body | null>(null)
   const rafRef = useRef<number>(0)
   const [cardStates, setCardStates] = useState<Map<string, CardState>>(new Map())
-  const [pinPositions, setPinPositions] = useState<Map<string, { x: number; y: number }>>(new Map())
+  const [cardLayouts, setCardLayouts] = useState<Map<string, CardLayout>>(new Map())
 
   // Init engine
   useEffect(() => {
     const engine = Matter.Engine.create({
-      gravity: { x: 0, y: 1, scale: 0.018 },
+      gravity: { x: 0, y: 1, scale: 0.008 },
     })
     engineRef.current = engine
 
@@ -143,8 +209,8 @@ export function usePhysics(wishes: Wish[]) {
     const engine = engineRef.current
     if (!engine) return
 
-    const pins = getPinPositions(wishes)
-    setPinPositions(pins)
+    const layouts = layoutCards(wishes)
+    setCardLayouts(layouts)
 
     const existing = cardsRef.current
 
@@ -152,50 +218,45 @@ export function usePhysics(wishes: Wish[]) {
     wishes.forEach((wish) => {
       if (existing.has(wish.id)) return
 
-      const pinPos = pins.get(wish.id)
-      if (!pinPos) return
+      const layout = layouts.get(wish.id)
+      if (!layout) return
 
       const seed = hashCode(wish.id)
 
-      const pin = Matter.Bodies.circle(pinPos.x, pinPos.y, 6, {
+      const pin = Matter.Bodies.circle(layout.pinX, layout.pinY, 6, {
         isStatic: true,
         collisionFilter: { mask: 0 },
       })
 
-      // Off-center pin: offset X by up to ±30% of card width
-      const pinOffsetX = (seededRandom(seed + 80) - 0.5) * CARD_W * 0.6
-
-      // Place card so the pin attachment point (top of card) starts at pin
       const card = Matter.Bodies.rectangle(
-        pinPos.x - pinOffsetX,
-        pinPos.y + CARD_H * 0.5,
-        CARD_W,
-        CARD_H,
+        layout.pinX - layout.pinOffsetX,
+        layout.pinY + layout.cardH * 0.5,
+        layout.cardW,
+        layout.cardH,
         {
-          mass: 2,
-          frictionAir: 0.015,
+          mass: 3,
+          frictionAir: 0.04, // high air friction = less swinging
           angle: 0,
-          restitution: 0.1,
+          restitution: 0.05,
           collisionFilter: { group: -1 },
         },
       )
 
-      // Pin attaches at the very top of the card, off-center
       const constraint = Matter.Constraint.create({
         bodyA: pin,
         bodyB: card,
-        pointB: { x: pinOffsetX, y: -CARD_H * 0.5 },
-        stiffness: 0.9,
-        damping: 0.05,
+        pointB: { x: layout.pinOffsetX, y: -layout.cardH * 0.5 },
+        stiffness: 0.95, // very stiff = cards stay put
+        damping: 0.15,
         length: 0,
       })
 
       Matter.Composite.add(engine.world, [pin, card, constraint])
-      existing.set(wish.id, { pin, card, constraint, pinOffsetX })
+      existing.set(wish.id, { pin, card, constraint, pinOffsetX: layout.pinOffsetX })
 
-      // Stronger initial nudge
+      // Gentle initial nudge
       Matter.Body.applyForce(card, card.position, {
-        x: (seededRandom(seed + 70) - 0.5) * 0.02,
+        x: (seededRandom(seed + 70) - 0.5) * 0.008,
         y: 0,
       })
     })
@@ -209,16 +270,16 @@ export function usePhysics(wishes: Wish[]) {
     })
   }, [wishes])
 
-  // Ambient breeze
+  // Ambient breeze — very gentle
   useEffect(() => {
     const interval = setInterval(() => {
       cardsRef.current.forEach((bodies) => {
         Matter.Body.applyForce(bodies.card, bodies.card.position, {
-          x: (Math.random() - 0.5) * 0.003,
+          x: (Math.random() - 0.5) * 0.001,
           y: 0,
         })
       })
-    }, 3000)
+    }, 4000)
     return () => clearInterval(interval)
   }, [])
 
@@ -261,5 +322,5 @@ export function usePhysics(wishes: Wish[]) {
     mouseConstraintRef.current = null
   }, [])
 
-  return { cardStates, pinPositions, startDrag, moveDrag, endDrag }
+  return { cardStates, cardLayouts, startDrag, moveDrag, endDrag }
 }

@@ -9,7 +9,7 @@ interface Props {
 
 export default function BoardView({ wishes }: Props) {
   const containerRef = useRef<HTMLDivElement>(null)
-  const { cardStates, pinPositions, startDrag, moveDrag, endDrag } = usePhysics(wishes)
+  const { cardStates, cardLayouts, startDrag, moveDrag, endDrag } = usePhysics(wishes)
 
   const handlePointerDown = useCallback(
     (wishId: string, e: React.PointerEvent) => {
@@ -35,11 +35,11 @@ export default function BoardView({ wishes }: Props) {
     endDrag()
   }, [endDrag])
 
-  // Calculate bounds — cards hang downward from pins, so use pin positions + generous card height
+  // Calculate bounds from card layouts
   let maxX = 1200, maxY = 800
-  pinPositions.forEach((pos) => {
-    maxX = Math.max(maxX, pos.x + 500)
-    maxY = Math.max(maxY, pos.y + 900)
+  cardLayouts.forEach((layout) => {
+    maxX = Math.max(maxX, layout.pinX + layout.cardW)
+    maxY = Math.max(maxY, layout.pinY + layout.cardH + 60)
   })
 
   return (
@@ -55,17 +55,13 @@ export default function BoardView({ wishes }: Props) {
         onPointerUp={handlePointerUp}
         onPointerLeave={handlePointerUp}
       >
-        {/* Cards — positioned at pin, hanging downward */}
         {wishes.map((wish) => {
           const state = cardStates.get(wish.id)
-          const pinPos = pinPositions.get(wish.id)
-          if (!state || !pinPos) return null
+          const layout = cardLayouts.get(wish.id)
+          if (!state || !layout) return null
 
-          // Pin offset from card center (stored in state)
           const offsetX = state.pinOffsetX
-          // Card width for transform-origin calculation
-          const cardW = wish.photo_path ? 300 : 280
-          // Pin attachment point as percentage from left edge of card
+          const cardW = layout.cardW
           const originX = ((cardW / 2 + offsetX) / cardW) * 100
 
           return (
@@ -73,10 +69,10 @@ export default function BoardView({ wishes }: Props) {
               key={wish.id}
               className="absolute cursor-grab active:cursor-grabbing select-none z-10"
               style={{
-                left: pinPos.x - (cardW / 2 + offsetX),
-                top: pinPos.y,
+                left: layout.pinX - (cardW / 2 + offsetX),
+                top: layout.pinY - 12,
                 transform: `rotate(${state.angle}deg)`,
-                transformOrigin: `${originX}% 0%`,
+                transformOrigin: `${originX}% 12px`,
               }}
               onPointerDown={(e) => handlePointerDown(wish.id, e)}
             >
@@ -84,7 +80,6 @@ export default function BoardView({ wishes }: Props) {
             </div>
           )
         })}
-
       </div>
     </div>
   )
