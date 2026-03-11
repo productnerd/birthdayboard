@@ -243,20 +243,17 @@ export function usePhysics(wishes: Wish[]) {
     return () => clearInterval(interval)
   }, [])
 
-  const startDrag = useCallback((wishId: string, clientX: number, clientY: number, containerRect: DOMRect) => {
+  const startDrag = useCallback((wishId: string, worldX: number, worldY: number) => {
     const engine = engineRef.current
     const bodies = cardsRef.current.get(wishId)
     const mouseBody = mouseBodRef.current
     if (!engine || !bodies || !mouseBody) return
 
-    const x = clientX - containerRect.left
-    const y = clientY - containerRect.top
-
-    Matter.Body.setPosition(mouseBody, { x, y })
+    Matter.Body.setPosition(mouseBody, { x: worldX, y: worldY })
 
     // Attach at the click point relative to the card body, not its center
-    const offsetX = x - bodies.card.position.x
-    const offsetY = y - bodies.card.position.y
+    const offsetX = worldX - bodies.card.position.x
+    const offsetY = worldY - bodies.card.position.y
 
     const constraint = Matter.Constraint.create({
       bodyA: mouseBody,
@@ -271,13 +268,10 @@ export function usePhysics(wishes: Wish[]) {
     mouseConstraintRef.current = constraint
   }, [])
 
-  const moveDrag = useCallback((clientX: number, clientY: number, containerRect: DOMRect) => {
+  const moveDrag = useCallback((worldX: number, worldY: number) => {
     const mouseBody = mouseBodRef.current
     if (!mouseBody || !mouseConstraintRef.current) return
-    Matter.Body.setPosition(mouseBody, {
-      x: clientX - containerRect.left,
-      y: clientY - containerRect.top,
-    })
+    Matter.Body.setPosition(mouseBody, { x: worldX, y: worldY })
   }, [])
 
   const endDrag = useCallback(() => {

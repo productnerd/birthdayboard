@@ -187,27 +187,35 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
     }
   }, [])
 
+  // Convert screen coordinates to physics world coordinates
+  const screenToWorld = useCallback((clientX: number, clientY: number) => {
+    const container = containerRef.current
+    if (!container) return { x: 0, y: 0 }
+    const rect = container.getBoundingClientRect()
+    return {
+      x: (clientX - rect.left - translateX) / scale,
+      y: (clientY - rect.top - translateY) / scale,
+    }
+  }, [scale, translateX, translateY])
+
   const handleCardPointerDown = useCallback(
     (wishId: string, e: React.PointerEvent) => {
       e.stopPropagation()
       isDraggingCard.current = true
-      const inner = innerRef.current
-      if (!inner) return
-      const rect = inner.getBoundingClientRect()
-      startDrag(wishId, e.clientX, e.clientY, rect)
+      const world = screenToWorld(e.clientX, e.clientY)
+      startDrag(wishId, world.x, world.y)
       ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
     },
-    [startDrag],
+    [startDrag, screenToWorld],
   )
 
   const handleCardPointerMove = useCallback(
     (e: React.PointerEvent) => {
       if (!isDraggingCard.current) return
-      const inner = innerRef.current
-      if (!inner) return
-      moveDrag(e.clientX, e.clientY, inner.getBoundingClientRect())
+      const world = screenToWorld(e.clientX, e.clientY)
+      moveDrag(world.x, world.y)
     },
-    [moveDrag],
+    [moveDrag, screenToWorld],
   )
 
   const handleCardPointerUp = useCallback(() => {
