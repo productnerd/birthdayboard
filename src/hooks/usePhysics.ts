@@ -128,7 +128,7 @@ export function usePhysics(wishes: Wish[]) {
   // Init engine
   useEffect(() => {
     const engine = Matter.Engine.create({
-      gravity: { x: 0, y: 2, scale: 0.4 },
+      gravity: { x: 0, y: 3, scale: 0.8 },
     })
     engineRef.current = engine
 
@@ -259,8 +259,8 @@ export function usePhysics(wishes: Wish[]) {
       bodyA: mouseBody,
       bodyB: bodies.card,
       pointB: { x: offsetX, y: offsetY },
-      stiffness: 0.6,
-      damping: 0.3,
+      stiffness: 1,
+      damping: 0.5,
       length: 0,
     })
 
