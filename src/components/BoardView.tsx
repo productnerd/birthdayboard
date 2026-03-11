@@ -240,7 +240,7 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
     <div
       ref={containerRef}
       className="w-full overflow-hidden cursor-grab active:cursor-grabbing"
-      style={{ height: 'calc(100vh - 180px)' }}
+      style={{ height: '100vh' }}
       onPointerDown={handleCanvasPointerDown}
       onPointerMove={handleCanvasPointerMove}
       onPointerUp={handleCanvasPointerUp}

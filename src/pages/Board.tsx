@@ -66,7 +66,7 @@ export default function Board() {
   }
 
   return (
-    <div className="min-h-screen cork-bg">
+    <div className="h-screen cork-bg relative overflow-hidden">
       {/* Share button — top right */}
       <button
         onClick={() => { copyShareUrl(); setShowShareModal(true) }}
@@ -75,8 +75,11 @@ export default function Board() {
         Share Board
       </button>
 
-      {/* Header */}
-      <div className="text-center py-6 px-4">
+      {/* Board — full screen, behind everything */}
+      <BoardView ref={boardViewRef} wishes={wishes} />
+
+      {/* Header — floating on top, transparent */}
+      <div className="fixed top-0 left-0 right-0 z-20 text-center py-6 px-4 pointer-events-none">
         <h1 className="font-handwriting text-5xl text-amber-950 drop-shadow-sm">
           Happy Birthday, {board.person_name}!
         </h1>
@@ -96,15 +99,12 @@ export default function Board() {
         ) : !showForm && (
           <button
             onClick={() => setShowForm(true)}
-            className="mt-4 bg-amber-900 hover:bg-amber-950 text-white font-handwriting text-xl px-6 py-2 rounded-lg transition-colors"
+            className="mt-4 bg-amber-900 hover:bg-amber-950 text-white font-handwriting text-xl px-6 py-2 rounded-lg transition-colors pointer-events-auto"
           >
             Add a Wish
           </button>
         )}
       </div>
-
-      {/* Board — always behind the form */}
-      <BoardView ref={boardViewRef} wishes={wishes} />
 
       {/* Add wish form — overlays on top */}
       {showForm && (
