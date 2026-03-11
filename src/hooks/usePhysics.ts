@@ -254,11 +254,16 @@ export function usePhysics(wishes: Wish[]) {
 
     Matter.Body.setPosition(mouseBody, { x, y })
 
+    // Attach at the click point relative to the card body, not its center
+    const offsetX = x - bodies.card.position.x
+    const offsetY = y - bodies.card.position.y
+
     const constraint = Matter.Constraint.create({
       bodyA: mouseBody,
       bodyB: bodies.card,
-      stiffness: 0.05,
-      damping: 0.1,
+      pointB: { x: offsetX, y: offsetY },
+      stiffness: 0.6,
+      damping: 0.3,
       length: 0,
     })
 
