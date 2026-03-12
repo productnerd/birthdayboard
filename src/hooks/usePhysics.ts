@@ -131,7 +131,7 @@ export function usePhysics(wishes: Wish[]) {
   // Init engine
   useEffect(() => {
     const engine = Matter.Engine.create({
-      gravity: { x: 0, y: 3, scale: 0.8 },
+      gravity: { x: 0, y: 4, scale: 1.2 },
     })
     engineRef.current = engine
 
