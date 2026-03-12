@@ -126,6 +126,7 @@ export function usePhysics(wishes: Wish[]) {
   const mouseBodRef = useRef<Matter.Body | null>(null)
   const rafRef = useRef<number>(0)
   const [cardStates, setCardStates] = useState<Map<string, CardState>>(new Map())
+  const [pinPositions, setPinPositions] = useState<Map<string, { x: number; y: number }>>(new Map())
   const [cardLayouts, setCardLayouts] = useState<Map<string, CardLayout>>(new Map())
 
   // Init engine
@@ -150,6 +151,7 @@ export function usePhysics(wishes: Wish[]) {
       Matter.Engine.update(engine, delta)
 
       const newStates = new Map<string, CardState>()
+      const newPins = new Map<string, { x: number; y: number }>()
       cardsRef.current.forEach((bodies, id) => {
         newStates.set(id, {
           x: bodies.card.position.x,
@@ -157,8 +159,10 @@ export function usePhysics(wishes: Wish[]) {
           angle: bodies.card.angle * (180 / Math.PI),
           pinOffsetX: bodies.pinOffsetX,
         })
+        newPins.set(id, { x: bodies.pin.position.x, y: bodies.pin.position.y })
       })
       setCardStates(newStates)
+      setPinPositions(newPins)
 
       rafRef.current = requestAnimationFrame(step)
     }
@@ -284,5 +288,12 @@ export function usePhysics(wishes: Wish[]) {
     mouseConstraintRef.current = null
   }, [])
 
-  return { cardStates, cardLayouts, startDrag, moveDrag, endDrag }
+  // Move the static pin body to a new world position (for pin dragging)
+  const movePin = useCallback((wishId: string, worldX: number, worldY: number) => {
+    const bodies = cardsRef.current.get(wishId)
+    if (!bodies) return
+    Matter.Body.setPosition(bodies.pin, { x: worldX, y: worldY })
+  }, [])
+
+  return { cardStates, cardLayouts, pinPositions, startDrag, moveDrag, endDrag, movePin }
 }

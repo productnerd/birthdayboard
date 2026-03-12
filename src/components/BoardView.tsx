@@ -15,7 +15,7 @@ export interface BoardViewHandle {
 const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes }, ref) {
   const containerRef = useRef<HTMLDivElement>(null)
   const innerRef = useRef<HTMLDivElement>(null)
-  const { cardStates, cardLayouts, startDrag, moveDrag, endDrag } = usePhysics(wishes)
+  const { cardStates, cardLayouts, pinPositions, startDrag, moveDrag, endDrag, movePin } = usePhysics(wishes)
 
   // Transform state
   const [scale, setScale] = useState(1)
@@ -31,6 +31,7 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
   const isMousePanning = useRef(false)
   const lastMouse = useRef({ x: 0, y: 0 })
   const isDraggingCard = useRef(false)
+  const isDraggingPin = useRef<string | null>(null)
 
   // Calculate board bounds from layouts
   let boardW = 1200, boardH = 800
@@ -223,6 +224,29 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
     endDrag()
   }, [endDrag])
 
+  // Pin drag handlers — moves the pin (and card follows)
+  const handlePinPointerDown = useCallback(
+    (wishId: string, e: React.PointerEvent) => {
+      e.stopPropagation()
+      isDraggingPin.current = wishId
+      ;(e.target as HTMLElement).setPointerCapture(e.pointerId)
+    },
+    [],
+  )
+
+  const handlePinPointerMove = useCallback(
+    (e: React.PointerEvent) => {
+      if (!isDraggingPin.current) return
+      const world = screenToWorld(e.clientX, e.clientY)
+      movePin(isDraggingPin.current, world.x, world.y)
+    },
+    [movePin, screenToWorld],
+  )
+
+  const handlePinPointerUp = useCallback(() => {
+    isDraggingPin.current = null
+  }, [])
+
   // Canvas mouse drag-to-pan
   const handleCanvasPointerDown = useCallback((e: React.PointerEvent) => {
     // Only left mouse button, and only if not on a card
@@ -265,10 +289,12 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
           transition: 'transform 0.3s ease-out',
         }}
       >
+        {/* Cards */}
         {wishes.map((wish) => {
           const state = cardStates.get(wish.id)
           const layout = cardLayouts.get(wish.id)
-          if (!state || !layout) return null
+          const pinPos = pinPositions.get(wish.id)
+          if (!state || !layout || !pinPos) return null
 
           const offsetX = state.pinOffsetX
           const cardW = layout.cardW
@@ -277,10 +303,10 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
           return (
             <div
               key={wish.id}
-              className="absolute cursor-grab active:cursor-grabbing select-none z-10"
+              className="absolute select-none z-10"
               style={{
-                left: layout.pinX - (cardW / 2 + offsetX),
-                top: layout.pinY - 12,
+                left: pinPos.x - (cardW / 2 + offsetX),
+                top: pinPos.y - 12,
                 transform: `rotate(${state.angle}deg)`,
                 transformOrigin: `${originX}% 12px`,
               }}
@@ -288,7 +314,40 @@ const BoardView = forwardRef<BoardViewHandle, Props>(function BoardView({ wishes
               onPointerMove={handleCardPointerMove}
               onPointerUp={handleCardPointerUp}
             >
-              <WishCard wish={wish} pinOffsetX={state.pinOffsetX} />
+              <WishCard wish={wish} />
+            </div>
+          )
+        })}
+
+        {/* Pins — rendered on top, draggable to move notes */}
+        {wishes.map((wish) => {
+          const pinPos = pinPositions.get(wish.id)
+          if (!pinPos) return null
+
+          return (
+            <div
+              key={`pin-${wish.id}`}
+              className="absolute z-30 cursor-move"
+              style={{
+                left: pinPos.x - 12,
+                top: pinPos.y - 12,
+                width: 24,
+                height: 24,
+                touchAction: 'none',
+              }}
+              onPointerDown={(e) => handlePinPointerDown(wish.id, e)}
+              onPointerMove={handlePinPointerMove}
+              onPointerUp={handlePinPointerUp}
+            >
+              <div
+                className="w-5 h-5 rounded-full shadow-md"
+                style={{
+                  marginLeft: 2,
+                  marginTop: 2,
+                  background: 'radial-gradient(circle at 35% 35%, #c0392b, #7b241c)',
+                  boxShadow: '0 2px 4px rgba(0,0,0,0.3), inset 0 1px 2px rgba(255,255,255,0.3)',
+                }}
+              />
             </div>
           )
         })}

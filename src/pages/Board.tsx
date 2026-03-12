@@ -92,11 +92,7 @@ export default function Board() {
           — organized by {board.creator_name}
         </p>
 
-        {hasPosted ? (
-          <p className="mt-4 font-hand text-lg text-amber-950 italic">
-            You've already left your wish!
-          </p>
-        ) : !showForm && (
+        {!hasPosted && !showForm && (
           <button
             onClick={() => setShowForm(true)}
             className="mt-4 bg-amber-900 hover:bg-amber-950 text-white font-handwriting text-xl px-6 py-2 rounded-lg transition-colors pointer-events-auto"
