@@ -80,8 +80,11 @@ export default function Board() {
 
       {/* Header — floating on top, transparent */}
       <div className="fixed top-0 left-0 right-0 z-20 text-center py-6 px-4 pointer-events-none">
-        <h1 className="font-handwriting text-5xl text-amber-950 drop-shadow-sm">
-          Happy Birthday, {board.person_name}!
+        <h1
+          className={`text-5xl text-amber-950 drop-shadow-sm ${board.headline_font ? '' : 'font-handwriting'}`}
+          style={board.headline_font ? { fontFamily: `'${board.headline_font}', cursive` } : undefined}
+        >
+          {board.headline || `Happy Birthday, ${board.person_name}!`}
         </h1>
         {board.prompt_note && (
           <p className="font-hand text-xl text-amber-950 mt-2 italic">

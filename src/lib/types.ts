@@ -7,6 +7,8 @@ export interface Board {
   prompt_note: string | null
   creator_name: string
   creator_email: string | null
+  headline: string | null
+  headline_font: string | null
   created_at: string
 }
 

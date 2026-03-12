@@ -8,6 +8,8 @@ export async function createBoard(data: {
   creator_name: string
   creator_email: string
   prompt_note?: string
+  headline?: string | null
+  headline_font?: string | null
   person_image?: File
 }): Promise<Board> {
   const slug = generateSlug()
@@ -21,6 +23,8 @@ export async function createBoard(data: {
       creator_name: data.creator_name,
       creator_email: data.creator_email,
       prompt_note: data.prompt_note || null,
+      headline: data.headline || null,
+      headline_font: data.headline_font || null,
     })
     .select()
     .single()

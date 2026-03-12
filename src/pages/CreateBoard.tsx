@@ -1,11 +1,24 @@
 import { useState, type FormEvent } from 'react'
 import { useNavigate } from 'react-router-dom'
 import { createBoard } from '../lib/api'
+import { FONTS } from '../lib/fonts'
 
 export default function CreateBoard() {
   const navigate = useNavigate()
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState('')
+  const [fontIndex, setFontIndex] = useState(FONTS.indexOf('Gloria Hallelujah'))
+  const [headline, setHeadline] = useState('Happy Birthday ...')
+
+  const currentFont = FONTS[fontIndex]
+
+  function prevFont() {
+    setFontIndex((i) => (i - 1 + FONTS.length) % FONTS.length)
+  }
+
+  function nextFont() {
+    setFontIndex((i) => (i + 1) % FONTS.length)
+  }
 
   async function handleSubmit(e: FormEvent<HTMLFormElement>) {
     e.preventDefault()
@@ -25,6 +38,8 @@ export default function CreateBoard() {
         creator_name: form.get('creator_name') as string,
         creator_email: form.get('creator_email') as string,
         prompt_note: form.get('prompt_note') as string,
+        headline: headline.trim() || null,
+        headline_font: currentFont,
       })
       navigate(`/created/${board.slug}`)
     } catch (err: unknown) {
@@ -104,6 +119,42 @@ export default function CreateBoard() {
             placeholder="you@example.com"
           />
         </label>
+
+        {/* Board headline */}
+        <label className="block mb-1">
+          <span className="text-amber-950 text-lg">Board headline</span>
+          <input
+            value={headline}
+            onChange={(e) => setHeadline(e.target.value)}
+            className="mt-1 block w-full rounded border border-amber-300 bg-amber-50 px-3 py-2 text-lg focus:outline-none focus:ring-2 focus:ring-amber-400"
+            style={{ fontFamily: `'${currentFont}', cursive` }}
+            placeholder="Happy Birthday ..."
+          />
+        </label>
+
+        {/* Font picker */}
+        <div className="flex items-center justify-between mb-4">
+          <button
+            type="button"
+            onClick={prevFont}
+            className="w-8 h-8 flex items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 transition-colors text-lg"
+          >
+            &lsaquo;
+          </button>
+          <span
+            className="text-lg text-amber-950 px-2 text-center"
+            style={{ fontFamily: `'${currentFont}', cursive` }}
+          >
+            {currentFont}
+          </span>
+          <button
+            type="button"
+            onClick={nextFont}
+            className="w-8 h-8 flex items-center justify-center rounded-full border border-amber-300 bg-amber-50 text-amber-950 hover:bg-amber-100 transition-colors text-lg"
+          >
+            &rsaquo;
+          </button>
+        </div>
 
         <label className="block mb-6">
           <span className="text-amber-950 text-lg">Prompt for friends (optional)</span>

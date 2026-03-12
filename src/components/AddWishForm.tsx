@@ -2,19 +2,7 @@ import { useState, useRef, type FormEvent } from 'react'
 import { createWish } from '../lib/api'
 import { compressImage } from '../lib/compress'
 import type { Wish } from '../lib/types'
-
-const FONTS = [
-  'Lacquer',
-  'Walter Turncoat',
-  'Indie Flower',
-  'Gloria Hallelujah',
-  'Homemade Apple',
-  'Reenie Beanie',
-  'Nothing You Could Do',
-  'Cedarville Cursive',
-  'Mansalva',
-  'Patrick Hand SC',
-]
+import { FONTS } from '../lib/fonts'
 
 interface Props {
   boardId: string
