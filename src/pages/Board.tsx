@@ -67,13 +67,18 @@ export default function Board() {
 
   return (
     <div className="h-screen cork-bg relative overflow-hidden">
-      {/* Share button — top right */}
-      <button
-        onClick={() => { copyShareUrl(); setShowShareModal(true) }}
-        className="fixed top-4 right-4 z-50 bg-amber-900/90 hover:bg-amber-950 text-white font-hand px-4 py-2 rounded-lg transition-colors text-sm"
-      >
-        Share Board
-      </button>
+      {/* Share button + deadline pill — top right */}
+      <div className="fixed top-4 right-4 z-50 flex flex-col items-end gap-2">
+        <button
+          onClick={() => { copyShareUrl(); setShowShareModal(true) }}
+          className="bg-amber-900/90 hover:bg-amber-950 text-white font-hand px-4 py-2 rounded-lg transition-colors text-sm"
+        >
+          Share Board
+        </button>
+        <span className="bg-amber-100/90 text-amber-900 font-hand text-xs px-3 py-1 rounded-full">
+          Add wishes by {new Date(board.birthday_date + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })}
+        </span>
+      </div>
 
       {/* Board — full screen, behind everything */}
       <BoardView ref={boardViewRef} wishes={wishes} />
@@ -117,6 +122,7 @@ export default function Board() {
         <ShareModal
           shareUrl={shareUrl}
           personName={board.person_name}
+          deadline={board.birthday_date}
           onClose={() => setShowShareModal(false)}
         />
       )}

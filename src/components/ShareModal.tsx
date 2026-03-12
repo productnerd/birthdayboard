@@ -3,10 +3,12 @@ import { useState } from 'react'
 interface Props {
   shareUrl: string
   personName: string
+  deadline: string
   onClose: () => void
 }
 
-export default function ShareModal({ shareUrl, personName, onClose }: Props) {
+export default function ShareModal({ shareUrl, personName, deadline, onClose }: Props) {
+  const deadlineFormatted = new Date(deadline + 'T00:00:00').toLocaleDateString('en-US', { month: 'long', day: 'numeric' })
   const [copied, setCopied] = useState(false)
 
   function copyUrl() {
@@ -28,6 +30,11 @@ export default function ShareModal({ shareUrl, personName, onClose }: Props) {
         <h3 className="font-handwriting text-2xl text-amber-900 mb-2 text-center">
           Wish posted!
         </h3>
+        <span className="block text-center mb-3">
+          <span className="inline-block bg-amber-100 text-amber-900 font-hand text-xs px-3 py-1 rounded-full">
+            Add wishes by {deadlineFormatted}
+          </span>
+        </span>
         <p className="font-hand text-amber-950 text-center mb-4">
           Know 2-3 more friends who'd want to wish {personName} a happy birthday? Share this link with them!
         </p>

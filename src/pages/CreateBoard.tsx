@@ -74,7 +74,7 @@ export default function CreateBoard() {
         </label>
 
         <div className="block mb-4">
-          <span className="text-amber-950 text-lg">Birthday date</span>
+          <span className="text-amber-950 text-lg">Last day to add wishes</span>
           <div className="flex gap-3 mt-1">
             <select
               name="birthday_month"
